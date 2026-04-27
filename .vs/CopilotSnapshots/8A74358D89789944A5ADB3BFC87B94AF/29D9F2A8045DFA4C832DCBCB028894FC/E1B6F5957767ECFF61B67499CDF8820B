@@ -1,0 +1,182 @@
+﻿#include "presentation.h"
+#include "raylib.h"
+#include "logic.h"
+#include <ctime>
+#include <cstdlib>
+
+void run_app() {
+    InitWindow(900, 600, "Sports Manager Pro - FINAL VERSION");
+    SetTargetFPS(60);
+    srand((unsigned int)time(NULL));
+
+    std::vector<Team> teams = load_data();
+
+    // Начални данни, ако файлът е празен
+    if (teams.empty()) {
+        add_team_logic(teams, "Real Madrid");
+        add_team_logic(teams, "FC Barcelona");
+        add_team_logic(teams, "Manchester City");
+    }
+
+    std::vector<Match> matches = { {2, 1}, {3, 2}, {0, 1} };
+    char inputBuf[50] = "\0";
+    int letterCount = 0;
+    bool showAddModal = false;
+    bool inputActive = false;
+
+    while (!WindowShouldClose()) {
+        // Handle modal input
+        if (showAddModal) {
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (inputActive && letterCount < 49 && key >= 32 && key <= 125) {
+                    inputBuf[letterCount] = (char)key;
+                    inputBuf[letterCount + 1] = '\0';
+                    letterCount++;
+                }
+                key = GetCharPressed();
+            }
+            if (inputActive && IsKeyPressed(KEY_BACKSPACE) && letterCount > 0) inputBuf[--letterCount] = '\0';
+            if (inputActive && IsKeyPressed(KEY_ENTER) && letterCount > 0) {
+                add_team_logic(teams, inputBuf);
+                inputBuf[0] = '\0'; letterCount = 0;
+                showAddModal = false;
+                inputActive = false;
+            }
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                showAddModal = false;
+                inputActive = false;
+            }
+        } else {
+            if (IsKeyPressed(KEY_F1) && teams.size() > 1) quick_sort_teams(teams, 0, (int)teams.size() - 1);
+            if (IsKeyPressed(KEY_F2)) delete_last_team_logic(teams);
+            if (IsKeyPressed(KEY_F3)) clear_all_teams_logic(teams);
+        }
+
+        BeginDrawing();
+        ClearBackground(GetColor(0x181C24FF));
+
+        // Sidebar
+        DrawRectangle(0, 0, 180, 600, GetColor(0x1A2233FF));
+        DrawText("SPORTS\nMANAGER", 24, 32, 24, GetColor(0x4ECCA3FF));
+
+        // Sidebar buttons with icons and highlight
+        int btnY = 120;
+        int btnH = 54;
+        int btnPad = 16;
+        Color btnColor = GetColor(0x232946FF);
+        Color btnHover = GetColor(0x4ECCA3FF);
+        Color btnActive = GetColor(0x393E46FF);
+        Vector2 mouse = GetMousePosition();
+
+        struct BtnInfo { const char* label; int icon; };
+        BtnInfo btns[4] = {
+            {"Add Team", 0},
+            {"Sort", 1},
+            {"Delete Last", 2},
+            {"Clear All", 3}
+        };
+        Rectangle btnRects[4];
+        bool btnHovers[4];
+        for (int b = 0; b < 4; b++) {
+            btnRects[b] = Rectangle{30, (float)btnY + b * (btnH + btnPad), 120, (float)btnH};
+            btnHovers[b] = CheckCollisionPointRec(mouse, btnRects[b]);
+            // Highlight bar
+            if (btnHovers[b]) DrawRectangle(20, (int)btnRects[b].y, 6, btnH, btnHover);
+            // Button background
+            DrawRectangleRounded(btnRects[b], 0.22f, 8, btnHovers[b] ? btnHover : btnColor);
+            // Icon (simple shapes)
+            int iconX = 44, iconY = (int)btnRects[b].y + 17;
+            switch (b) {
+                case 0: // Add (plus)
+                    DrawRectangle(iconX+6, iconY+2, 12, 4, WHITE);
+                    DrawRectangle(iconX+10, iconY-2, 4, 12, WHITE);
+                    break;
+                case 1: // Sort (arrows)
+                    DrawTriangle((Vector2){iconX+6, iconY+12}, (Vector2){iconX+12, iconY+4}, (Vector2){iconX+18, iconY+12}, WHITE);
+                    DrawTriangle((Vector2){iconX+6, iconY+2}, (Vector2){iconX+12, iconY+10}, (Vector2){iconX+18, iconY+2}, WHITE);
+                    break;
+                case 2: // Delete (trash)
+                    DrawRectangle(iconX+6, iconY+4, 12, 8, WHITE);
+                    DrawRectangle(iconX+8, iconY+2, 8, 3, WHITE);
+                    break;
+                case 3: // Clear (X)
+                    DrawLine(iconX+6, iconY+4, iconX+18, iconY+16, WHITE);
+                    DrawLine(iconX+18, iconY+4, iconX+6, iconY+16, WHITE);
+                    break;
+            }
+            // Label
+            DrawText(btns[b].label, 70, (int)btnRects[b].y + 15, 20, WHITE);
+        }
+        // Button actions
+        if (!showAddModal && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (btnHovers[0]) { showAddModal = true; inputActive = true; }
+            if (btnHovers[1] && teams.size() > 1) quick_sort_teams(teams, 0, (int)teams.size() - 1);
+            if (btnHovers[2]) delete_last_team_logic(teams);
+            if (btnHovers[3]) clear_all_teams_logic(teams);
+        }
+
+        // Main content area
+        DrawRectangleRounded(Rectangle{190, 20, 680, 520}, 0.10f, 12, GetColor(0xF4F7FAFF));
+        DrawText("LEAGUE STANDINGS", 220, 40, 36, GetColor(0x232946FF));
+
+        // Team list header
+        DrawText("Team", 220, 90, 24, GetColor(0x4ECCA3FF));
+        DrawText("Points", 600, 90, 24, GetColor(0x4ECCA3FF));
+        DrawText("Goals", 700, 90, 24, GetColor(0x4ECCA3FF));
+
+        // Team list as cards
+        for (int i = 0; i < (int)teams.size(); i++) {
+            int y = 120 + (i * 64);
+            // Card shadow
+            DrawRectangleRounded(Rectangle{204, (float)y+6, 642, 48}, 0.22f, 8, Fade(BLACK, 0.10f));
+            // Card gradient (simulate with two rectangles)
+            Color grad1 = GetColor(0xE3EFFFEE);
+            Color grad2 = GetColor(0xC7D7F0FF);
+            DrawRectangleRounded(Rectangle{200, (float)y, 650, 48}, 0.22f, 8, grad1);
+            DrawRectangleRounded(Rectangle{200, (float)y+24, 650, 24}, 0.22f, 8, grad2);
+            // Avatar (circle with initials)
+            DrawCircle(225, y + 24, 20, GetColor(0x4ECCA3FF));
+            char initials[3] = {0};
+            initials[0] = teams[i].name[0];
+            for (int j = 1, k = 1; teams[i].name[j] != '\0' && k < 2; j++) {
+                if (teams[i].name[j-1] == ' ' && teams[i].name[j] != ' ') {
+                    initials[k++] = teams[i].name[j];
+                }
+            }
+            DrawText(initials, 215, y + 14, 20, DARKBLUE);
+            // Team name
+            DrawText(teams[i].name, 260, y + 16, 26, GetColor(0x232946FF));
+            // Points
+            DrawText(TextFormat("%d", teams[i].points), 620, y + 16, 24, GOLD);
+            // Goals
+            DrawText(TextFormat("%d", teams[i].goalsScored), 720, y + 16, 24, GetColor(0x4ECCA3FF));
+        }
+
+        // Footer
+        DrawRectangle(190, 550, 680, 40, GetColor(0x232946FF));
+        int totalGoals = calculate_total_goals_recursive(matches, (int)matches.size());
+        DrawText(TextFormat("Total Goals: %d", totalGoals), 210, 560, 22, GetColor(0x4ECCA3FF));
+        DrawText("ESC to exit | F1:Sort F2:Del F3:Clear", 600, 560, 16, GetColor(0xB0B8C1FF));
+        DrawText("© 2024 BinaryBeasts", 750, 570, 12, GetColor(0xB0B8C1FF));
+
+        // Add Team Modal
+        if (showAddModal) {
+            DrawRectangle(0, 0, 900, 600, Fade(BLACK, 0.45f));
+            // Modal shadow
+            DrawRectangleRounded(Rectangle{304, 204, 312, 172}, 0.22f, 8, Fade(BLACK, 0.18f));
+            DrawRectangleRounded(Rectangle{300, 200, 320, 180}, 0.22f, 8, GetColor(0xF4F7FAFF));
+            DrawText("Add New Team", 370, 220, 28, GetColor(0x232946FF));
+            DrawRectangleRounded(Rectangle{340, 270, 240, 44}, 0.22f, 8, inputActive ? GetColor(0x4ECCA3FF) : GetColor(0xB0B8C1FF));
+            DrawText(inputBuf, 350, 280, 24, GetColor(0x232946FF));
+            DrawText("Press ENTER to add, ESC to cancel", 320, 330, 18, GetColor(0xB0B8C1FF));
+            if (CheckCollisionPointRec(mouse, Rectangle{340, 270, 240, 44}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                inputActive = true;
+            }
+        }
+
+        EndDrawing();
+    }
+    save_data(teams);
+    CloseWindow();
+}

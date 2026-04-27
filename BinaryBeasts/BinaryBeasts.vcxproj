@@ -127,11 +127,13 @@
     <ClCompile Include="logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="presentation.cpp" />
+    <ClCompile Include="team_ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data.h" />
     <ClInclude Include="logic.h" />
     <ClInclude Include="presentation.h" />
+    <ClInclude Include="team_ui.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

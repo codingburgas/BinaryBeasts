@@ -2,6 +2,15 @@
   logic.cpp
   main.cpp
   presentation.cpp
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\presentation.cpp(215,54): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\presentation.cpp(215,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\presentation.cpp(216,54): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\presentation.cpp(216,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  team_ui.cpp
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\team_ui.cpp(40,46): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\team_ui.cpp(40,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\team_ui.cpp(41,46): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+D:\binarybeasts\BinaryBeasts\BinaryBeasts\team_ui.cpp(41,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  BinaryBeasts.vcxproj -> C:\Users\gmurc\source\repos\BinaryBeasts\x64\Debug\BinaryBeasts.exe
+  BinaryBeasts.vcxproj -> D:\binarybeasts\BinaryBeasts\x64\Debug\BinaryBeasts.exe
