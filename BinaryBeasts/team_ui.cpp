@@ -3,12 +3,12 @@
 
 int DrawTeamCard(const Team& team, int y, int cardWidth, int cardHeight, int nameX, int pointsX, int goalsX, int editX, bool showEdit, int fontSize, Vector2 mouse, bool* editClicked) {
     // Card shadow
-    DrawRectangleRounded(Rectangle{(float)nameX-60+4, (float)y+8, (float)cardWidth-8, (float)cardHeight-8}, 0.22f, 8, Fade(BLACK, 0.10f));
+    DrawRectangleRounded(Rectangle{(float)nameX-60+4, (float)y+8, (float)cardWidth-8, (float)cardHeight-8}, 0.22f, 12, Fade(BLACK, 0.08f));
     // Card gradient
-    Color grad1 = GetColor(0xE3EFFFEE);
-    Color grad2 = GetColor(0xC7D7F0FF);
-    DrawRectangleRounded(Rectangle{(float)nameX-60, (float)y, (float)cardWidth, (float)cardHeight}, 0.22f, 8, grad1);
-    DrawRectangleRounded(Rectangle{(float)nameX-60, (float)y+cardHeight/2, (float)cardWidth, (float)cardHeight/2}, 0.22f, 8, grad2);
+    Color grad1 = GetColor(0xF4F7FAFF);
+    Color grad2 = GetColor(0xE3EFFFEE);
+    DrawRectangleRounded(Rectangle{(float)nameX-60, (float)y, (float)cardWidth, (float)cardHeight}, 0.22f, 12, grad1);
+    DrawRectangleRounded(Rectangle{(float)nameX-60, (float)y+cardHeight/2, (float)cardWidth, (float)cardHeight/2}, 0.22f, 12, grad2);
     // Avatar
     DrawCircle(nameX-25, y + cardHeight/2, 26, GetColor(0x4ECCA3FF));
     char initials[3] = {0};
@@ -18,20 +18,38 @@ int DrawTeamCard(const Team& team, int y, int cardWidth, int cardHeight, int nam
             initials[k++] = team.name[j];
         }
     }
-    DrawText(initials, nameX-35, y + cardHeight/2 - 12, 28, DARKBLUE);
-    // Team name (fit font size)
-    int maxNameW = pointsX - nameX - 20;
+    DrawText(initials, nameX-35, y + cardHeight/2 - 14, 28, DARKBLUE);
+    // Team name (fit font size and truncate)
+    int maxNameW = pointsX - nameX - 24;
     int nameFont = fontSize;
-    int textW = MeasureText(team.name, nameFont);
+    char nameBuf[60];
+    strncpy_s(nameBuf, sizeof(nameBuf), team.name, sizeof(nameBuf)-1); nameBuf[sizeof(nameBuf)-1] = '\0';
+    int textW = MeasureText(nameBuf, nameFont);
+    int nameLen = (int)strlen(nameBuf);
     while (textW > maxNameW && nameFont > 16) {
         nameFont--;
-        textW = MeasureText(team.name, nameFont);
+        textW = MeasureText(nameBuf, nameFont);
     }
-    DrawText(team.name, nameX, y + cardHeight/2 - nameFont/2, nameFont, GetColor(0x232946FF));
+    while (textW > maxNameW && nameLen > 3) {
+        nameBuf[--nameLen] = '\0';
+        int ellipIdx = (nameLen-3 > 0 ? nameLen-3 : 0);
+        strcpy_s(&nameBuf[ellipIdx], sizeof(nameBuf)-ellipIdx, "...");
+        textW = MeasureText(nameBuf, nameFont);
+    }
+    DrawText(nameBuf, nameX, y + cardHeight/2 - nameFont/2, nameFont, GetColor(0x232946FF));
     // Points
     DrawText(TextFormat("%d", team.points), pointsX, y + cardHeight/2 - fontSize/2, fontSize, GOLD);
-    // Goals
-    DrawText(TextFormat("%d", team.goalsScored), goalsX, y + cardHeight/2 - fontSize/2, fontSize, GetColor(0x4ECCA3FF));
+    // Goals (fit in box)
+    char goalsBuf[16];
+    snprintf(goalsBuf, 15, "%d", team.goalsScored);
+    int goalsW = MeasureText(goalsBuf, fontSize);
+    int maxGoalsW = 80;
+    int goalsFont = fontSize;
+    while (goalsW > maxGoalsW && goalsFont > 16) {
+        goalsFont--;
+        goalsW = MeasureText(goalsBuf, goalsFont);
+    }
+    DrawText(goalsBuf, goalsX, y + cardHeight/2 - goalsFont/2, goalsFont, GetColor(0x4ECCA3FF));
     // Edit button
     bool clicked = false;
     if (showEdit) {
