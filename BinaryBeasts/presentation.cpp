@@ -1,4 +1,5 @@
 ﻿#include "raylib.h"
+#include "football_menu.h"
 #include "logic.h"
 #include <algorithm>
 #include <ctime>
@@ -78,9 +79,13 @@ static void ApplySort(std::vector<Team>& teams, int sortMode) {
 }
 
 void run_app() {
-    InitWindow(1200, 800, "Sports Manager Pro - FINAL VERSION");
+    InitWindow(1200, 800, "Pitch & Score");
     SetTargetFPS(60);
+    SetExitKey(KEY_NULL);
     srand((unsigned int)time(NULL));
+
+    AppScreen screen = AppScreen::MainMenu;
+    bool shouldQuit = false;
 
     std::vector<Team> teams = load_data();
 
@@ -109,9 +114,9 @@ void run_app() {
     // Sort toggle state: 0 = by points, 1 = by goals, 2 = by name
     int sortMode = 0;
     const char* sortLabels[3] = {"Sort: Points", "Sort: Goals", "Sort: Name"};
-    while (!WindowShouldClose()) {
-        // Handle modal input
-        if (showAddModal) {
+    while (!WindowShouldClose() && !shouldQuit) {
+        // Handle modal input (league table screen only)
+        if (screen == AppScreen::LeagueStandings && showAddModal) {
             int key = GetCharPressed();
             while (key > 0) {
                 if (inputActive && letterCount < 49 && key >= 32 && key <= 125) {
@@ -144,7 +149,7 @@ void run_app() {
                 showAddModal = false;
                 inputActive = false;
             }
-        } else {
+        } else if (screen == AppScreen::LeagueStandings) {
             if (IsKeyPressed(KEY_F1) && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
                 ApplySort(teams, sortMode);
@@ -154,15 +159,67 @@ void run_app() {
         }
 
         BeginDrawing();
-        Color bg = GetColor(0xF3F4F6FF);
-        Color sidebar = GetColor(0x1F2937FF);
-        Color panel = GetColor(0xFAFAF9FF);
+        Vector2 mouse = GetMousePosition();
+
+        switch (screen) {
+        case AppScreen::MainMenu: {
+            AppScreen next = UpdateAndDrawMainMenu(mouse, 1200, 800);
+            if (next == AppScreen::Quit || IsKeyPressed(KEY_ESCAPE))
+                shouldQuit = true;
+            else if (next != AppScreen::MainMenu)
+                screen = next;
+            EndDrawing();
+            continue;
+        }
+        case AppScreen::LiveScores: {
+            bool gb = false;
+            DrawLiveScoresScreen(teams, mouse, 1200, 800, &gb);
+            if (gb) screen = AppScreen::MainMenu;
+            EndDrawing();
+            continue;
+        }
+        case AppScreen::MatchSchedule: {
+            bool gb = false;
+            DrawMatchScheduleScreen(teams, mouse, 1200, 800, &gb);
+            if (gb) screen = AppScreen::MainMenu;
+            EndDrawing();
+            continue;
+        }
+        case AppScreen::SeasonStats: {
+            bool gb = false;
+            DrawSeasonStatsScreen(teams, mouse, 1200, 800, &gb);
+            if (gb) screen = AppScreen::MainMenu;
+            EndDrawing();
+            continue;
+        }
+        case AppScreen::About: {
+            bool gb = false;
+            DrawAboutScreen(mouse, 1200, 800, &gb);
+            if (gb) screen = AppScreen::MainMenu;
+            EndDrawing();
+            continue;
+        }
+        case AppScreen::Quit:
+            shouldQuit = true;
+            EndDrawing();
+            continue;
+        case AppScreen::LeagueStandings:
+        default:
+            break;
+        }
+
+        // Match the football main menu theme (pitch green + gold accent).
+        Color pitch = GetColor(0x166534FF);
+        Color pitchDark = GetColor(0x14532DFF);
+        Color bg = pitch;
+        Color sidebar = pitchDark;
+        Color panel = GetColor(0xF0FDF4FF);
         Color cardTop = GetColor(0xFFFFFFFF);
-        Color cardBottom = GetColor(0xF1F5F9FF);
-        Color accent = GetColor(0x0EA5E9FF);
-        Color accentSoft = GetColor(0xC4B5FDFF);
-        Color textMain = GetColor(0x111827FF);
-        Color textMuted = GetColor(0x6B7280FF);
+        Color cardBottom = GetColor(0xECFDF5FF);
+        Color accent = GetColor(0xFACC15FF);      // gold
+        Color accentSoft = GetColor(0x22C55EFF);  // bright green
+        Color textMain = GetColor(0x052E16FF);
+        Color textMuted = GetColor(0x365314FF);
         Color success = GetColor(0x16A34AFF);
         Color warning = GetColor(0xCA8A04FF);
 
@@ -183,19 +240,27 @@ void run_app() {
         const int FOOTER_W = MAIN_W;
         const int FOOTER_H = 110;
 
+        // Pitch stripes background (like main menu).
         ClearBackground(bg);
+        for (int y = 0; y < 800; y += 80) {
+            DrawRectangle(0, y, 1200, 40, (y / 80) % 2 == 0 ? Fade(pitch, 1.0f) : Fade(pitchDark, 0.35f));
+        }
 
         // Sidebar
         DrawRectangle(0, 0, SIDEBAR_W, 800, sidebar);
-        DrawText("SPORTS\nMANAGER", 44, 50, 30, accentSoft);
+        DrawText("PITCH\n&SCORE", 58, 50, 30, accent);
 
         // Sidebar buttons with icons and highlight
-        int btnY = 180;
+        int btnY = 228;
         int btnH = 64;
         int btnPad = 24;
-        Color btnColor = GetColor(0x374151FF);
-        Color btnHover = GetColor(0x4B5563FF);
-        Vector2 mouse = GetMousePosition();
+        Color btnColor = GetColor(0x1E3A2FFF);
+        Color btnHover = GetColor(0x15803DFF);
+
+        Rectangle homeBtn{50, 132, 160, 40};
+        bool homeHover = CheckCollisionPointRec(mouse, homeBtn);
+        DrawRectangleRounded(homeBtn, 0.2f, 8, homeHover ? btnHover : btnColor);
+        DrawText("Main menu", 70, 142, 18, WHITE);
 
         struct BtnInfo { const char* label; int icon; };
         BtnInfo btns[4] = {
@@ -238,6 +303,7 @@ void run_app() {
         }
         // Button actions
         if (!showAddModal && !showEditModal && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (homeHover) screen = AppScreen::MainMenu;
             if (btnHovers[0]) { showAddModal = true; inputActive = true; }
             if (btnHovers[1] && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
@@ -338,7 +404,7 @@ void run_app() {
         int totalGoals = 0;
         for (const auto& t : teams) totalGoals += t.goalsScored;
         DrawText(TextFormat("Total Goals: %d", totalGoals), FOOTER_X + 26, FOOTER_Y + 20, FONT_SECTION, textMain);
-        DrawText("ESC: Exit | F1:Sort | F2:Delete Last | F3:Clear All", FOOTER_X + 340, FOOTER_Y + 24, FONT_META, textMuted);
+        DrawText("Main menu: sidebar | F1: Sort | F2: Delete last | F3: Clear all", FOOTER_X + 340, FOOTER_Y + 24, FONT_META, textMuted);
         DrawText("+/- buttons change points directly", FOOTER_X + 340, FOOTER_Y + 46, FONT_META, textMuted);
         DrawText("© 2024 BinaryBeasts", FOOTER_X + FOOTER_W - 150, FOOTER_Y + 78, FONT_META, textMuted);
 
