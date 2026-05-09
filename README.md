@@ -1,41 +1,101 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/TH5oISMB)
-# Binary Beasts
-# 🏆 Система за управление на спортни резултати
+<div align="center">
 
-Системата за управление на спортни резултати е уеб приложение, предназначено за събиране, обработка и визуализиране на резултати от различни спортни дисциплини. Проектът цели да улесни спортните клубове, организаторите на турнири и феновете, като предоставя централизирана и лесна за използване платформа.
+# ⚽ BinaryBeasts - Pitch & Score
 
----
+![Version](https://img.shields.io/badge/version-1.0-blue)
+![Language](https://img.shields.io/badge/language-C%2B%2B-00599C?logo=cplusplus)
+![Graphics](https://img.shields.io/badge/framework-raylib-2d2d2d?logo=raylib)
+![Status](https://img.shields.io/badge/status-active-success)
 
-## 🚀 Основни функционалности
-- 📊 **[Управление на резултати](ca://s?q=Разкажи_ми_повече_за_управление_на_резултати)** — добавяне, редактиране и изтриване на резултати.
-- 🧑‍🤝‍🧑 **[Управление на отбори](ca://s?q=Как_се_управляват_отбори)** — създаване и поддръжка на спортни отбори.
-- 🏅 **[Класирания](ca://s?q=Как_се_генерират_класирания)** — автоматично изчисляване на точки и позиции.
-- 📅 **[График на срещи](ca://s?q=Как_работи_графикът_на_срещи)** — планиране на мачове и събития.
-- 🔍 **[Търсене и филтриране](ca://s?q=Опции_за_търсене_и_филтриране)** — бързо намиране на информация.
-- 📱 **Респонсив дизайн** — оптимизиран за мобилни устройства.
+**A desktop football league manager with interactive screens for standings, scores, fixtures, and season insights**
+
+</div>
 
 ---
 
-<h2 align="center" id="technologies">🛠️ Технологии </h2>
-<h3 align="center"> Това са инструментите които използвахме:</h3>
- 
-<p align="center">
-    <a href="https://git-scm.com/"><img src="https://git-scm.com/images/logos/downloads/Git-Icon-Black.png" alt="Git logo" width="70"/></a>
-    <a href="https://github.com/"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111612.png" alt="GitHub logo" width="70"/></a>
-    <a href="https://www.cplusplus.com/"><img src="https://brandslogos.com/wp-content/uploads/thumbs/c-logo-vector.svg" alt="C++ logo" width="70"/></a>
-    <a href="https://visualstudio.microsoft.com/vs/"><img src="https://visualstudio.microsoft.com/wp-content/uploads/2021/10/Product-Icon.svg" alt="Visual Studio logo" width="70"/></a>
-    <a href="https://www.microsoft.com/en/microsoft-teams/group-chat-software"><img src="https://img.icons8.com/color/344/microsoft-teams.png" alt="MS Teams logo" width="70" /></a>
-    <a href="https://www.microsoft.com/en-ww/microsoft-365/word"><img src="https://img.icons8.com/color/344/ms-word.png" alt="MS Word logo" width="70" /></a>
-    <a href="https://www.microsoft.com/en-ww/microsoft-365/powerpoint"><img src="https://img.icons8.com/color/344/ms-powerpoint.png" alt="MS PowerPoint logo" width="70" /></a>
-</p>
-<hr>
+<div align="center">
+
+## 📋 Table of Contents
+
+</div>
+
+* [🎯 About the Project](#about-the-project)
+* [🚀 Core Features](#core-features)
+* [🛠️ Technologies](#technologies)
+* [📊 System Overview](#system-overview)
+* [📁 Project Structure](#project-structure)
+* [📥 Installation](#installation)
+* [▶️ Run the App](#run-the-app)
 
 ---
 
-## 📦 Инсталация
+<div align="center">
+<h2 id="about-the-project">🎯 About the Project</h2>
+</div>
 
-```bash
-git clone https://github.com/your-username/sports-results-system.git
-cd sports-results-system
-npm install
-npm start
+**BinaryBeasts (Pitch & Score)** is a C++ desktop application built with **raylib** that simulates a football league control desk.
+
+It lets users manage teams, update table data, and navigate focused views for:
+
+* 🏆 League standings
+* 🔴 Live score previews (simulated)
+* 📅 Match schedule
+* 📈 Season statistics
+* ℹ️ About section
+
+Team data is persisted in a local binary file (`database.bin`) between runs.
+
+---
+
+<div align="center">
+<h2 id="core-features">🚀 Core Features</h2>
+</div>
+
+### 🧭 Main Navigation (`football_menu.cpp`)
+
+* Centered home menu with multiple screens
+* Keyboard and mouse navigation support
+* Shared top-bar chrome for subpages
+
+---
+
+### 🏆 League Table Management (`presentation.cpp`)
+
+* Add new teams through modal input
+* Edit team name, goals, and points
+* Increment/decrement points directly from cards
+* Delete last team or clear all teams
+* Sort teams by points, goals, or name
+
+---
+
+### 🔴 Live Scores View (`football_menu.cpp`)
+
+* Simulated match score cards
+* "Live" indicator styling
+* Auto-generated pairings based on current teams
+
+---
+
+### 📅 Match Schedule (`football_menu.cpp`)
+
+* Fixture list with time slots
+* Dynamic team-vs-team generation
+* Matchday labeling
+
+---
+
+### 📈 Season Statistics (`football_menu.cpp`)
+
+* Total clubs, goals, and points
+* Average goals per club
+* Leader detection and tier labeling
+
+---
+
+### 💾 Data Layer (`data.cpp`)
+
+* Binary save/load system for `Team` records
+* Reads from and writes to `database.bin`
+* Restores previous league state on app start
+... (остава(т) 97 реда)
