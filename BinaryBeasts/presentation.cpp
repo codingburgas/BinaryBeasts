@@ -60,24 +60,6 @@ static const char* GetScoreTier(const Team& team) {
     return "Developing";
 }
 
-static void ApplySort(std::vector<Team>& teams, int sortMode) {
-    if (sortMode == 0) {
-        std::sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
-            if (a.points == b.points) return a.goalsScored > b.goalsScored;
-            return a.points > b.points;
-        });
-    } else if (sortMode == 1) {
-        std::sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
-            if (a.goalsScored == b.goalsScored) return a.points > b.points;
-            return a.goalsScored > b.goalsScored;
-        });
-    } else {
-        std::sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
-            return strcmp(a.name, b.name) < 0;
-        });
-    }
-}
-
 void run_app() {
     InitWindow(1200, 800, "Pitch & Score");
     SetTargetFPS(60);
@@ -96,7 +78,6 @@ void run_app() {
         add_team_logic(teams, "Manchester City");
     }
 
-    std::vector<Match> matches = { {2, 1}, {3, 2}, {0, 1} };
     char inputBuf[50] = "\0";
     int letterCount = 0;
     bool showAddModal = false;
@@ -114,6 +95,10 @@ void run_app() {
     // Sort toggle state: 0 = by points, 1 = by goals, 2 = by name
     int sortMode = 0;
     const char* sortLabels[3] = {"Sort: Points", "Sort: Goals", "Sort: Name"};
+    char searchBuf[50] = "\0";
+    int searchLetterCount = 0;
+    bool searchInputActive = false;
+    int foundTeamIndex = -1;
     while (!WindowShouldClose() && !shouldQuit) {
         // Handle modal input (league table screen only)
         if (screen == AppScreen::LeagueStandings && showAddModal) {
@@ -152,10 +137,27 @@ void run_app() {
         } else if (screen == AppScreen::LeagueStandings) {
             if (IsKeyPressed(KEY_F1) && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
-                ApplySort(teams, sortMode);
+                sort_teams_by_mode_logic(teams, sortMode);
             }
             if (IsKeyPressed(KEY_F2)) delete_last_team_logic(teams);
             if (IsKeyPressed(KEY_F3)) clear_all_teams_logic(teams);
+            if (!showEditModal && !showAddModal) {
+                int searchKey = GetCharPressed();
+                while (searchKey > 0) {
+                    if (searchInputActive && searchLetterCount < 49 && searchKey >= 32 && searchKey <= 125) {
+                        searchBuf[searchLetterCount] = (char)searchKey;
+                        searchBuf[searchLetterCount + 1] = '\0';
+                        searchLetterCount++;
+                    }
+                    searchKey = GetCharPressed();
+                }
+                if (searchInputActive && IsKeyPressed(KEY_BACKSPACE) && searchLetterCount > 0) {
+                    searchBuf[--searchLetterCount] = '\0';
+                }
+                if (searchInputActive && IsKeyPressed(KEY_ENTER)) {
+                    foundTeamIndex = find_team_by_name_linear_logic(teams, searchBuf);
+                }
+            }
         }
 
         BeginDrawing();
@@ -307,10 +309,24 @@ void run_app() {
             if (btnHovers[0]) { showAddModal = true; inputActive = true; }
             if (btnHovers[1] && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
-                ApplySort(teams, sortMode);
+                sort_teams_by_mode_logic(teams, sortMode);
             }
             if (btnHovers[2]) delete_last_team_logic(teams);
             if (btnHovers[3]) clear_all_teams_logic(teams);
+        }
+
+        Rectangle searchBox{50, 612, 160, 38};
+        bool searchHover = CheckCollisionPointRec(mouse, searchBox);
+        DrawRectangleRounded(searchBox, 0.2f, 6, searchInputActive ? GetColor(0xE0F2FEFF) : btnColor);
+        DrawRectangleRoundedLinesEx(searchBox, 0.2f, 6, 2.0f, searchHover ? accent : Fade(WHITE, 0.25f));
+        DrawEllipsizedText(searchBuf[0] ? searchBuf : "Search name", Rectangle{56, 616, 148, 30}, 15, WHITE, false);
+        if (!showAddModal && !showEditModal && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            searchInputActive = searchHover;
+        }
+        if (foundTeamIndex >= 0 && foundTeamIndex < (int)teams.size()) {
+            DrawEllipsizedText(teams[foundTeamIndex].name, Rectangle{52, 656, 156, 24}, 14, accent, false);
+        } else if (searchBuf[0] != '\0') {
+            DrawEllipsizedText("No exact match", Rectangle{52, 656, 156, 24}, 14, Fade(WHITE, 0.8f), false);
         }
 
         // Main content area
@@ -401,8 +417,7 @@ void run_app() {
         // Footer
         DrawRectangleRounded(Rectangle{(float)FOOTER_X, (float)FOOTER_Y, (float)FOOTER_W, (float)FOOTER_H}, 0.08f, 8, GetColor(0xE5E7EBFF));
         // Dynamic total goals from teams
-        int totalGoals = 0;
-        for (const auto& t : teams) totalGoals += t.goalsScored;
+        int totalGoals = calculate_total_goals_from_teams_recursive(teams, (int)teams.size());
         DrawText(TextFormat("Total Goals: %d", totalGoals), FOOTER_X + 26, FOOTER_Y + 20, FONT_SECTION, textMain);
         DrawText("Main menu: sidebar | F1: Sort | F2: Delete last | F3: Clear all", FOOTER_X + 340, FOOTER_Y + 24, FONT_META, textMuted);
         DrawText("+/- buttons change points directly", FOOTER_X + 340, FOOTER_Y + 46, FONT_META, textMuted);
