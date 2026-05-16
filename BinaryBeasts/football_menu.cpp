@@ -1,4 +1,5 @@
 #include "football_menu.h"
+#include "logic.h"
 
 static void DrawFittedCenter(const char* text, Rectangle box, int startFont, int minFont, Color color) {
     int fontSize = startFont;
@@ -182,12 +183,9 @@ void DrawSeasonStatsScreen(const std::vector<Team>& teams, Vector2 mouse, int sc
     int y = 80;
     Color textMain = GetColor(0x111827FF);
 
-    int totalGoals = 0;
-    int totalPts = 0;
-    for (const auto& t : teams) {
-        totalGoals += t.goalsScored;
-        totalPts += t.points;
-    }
+    int totalGoals = calculate_total_goals_from_teams_recursive(teams, (int)teams.size());
+    int totalPts = calculate_total_points_recursive(teams, (int)teams.size());
+    int matchGoalsTotal = calculate_demo_match_goals_total_logic(teams);
     float avgGoals = teams.empty() ? 0.0f : (float)totalGoals / (float)teams.size();
 
     const Team* best = nullptr;
@@ -206,6 +204,8 @@ void DrawSeasonStatsScreen(const std::vector<Team>& teams, Vector2 mouse, int sc
     DrawText(TextFormat("Points in table (sum): %d", totalPts), 56, y, 22, textMain);
     y += 32;
     DrawText(TextFormat("Average goals per club: %.1f", avgGoals), 56, y, 22, textMain);
+    y += 32;
+    DrawText(TextFormat("Demo fixture goals (recursive): %d", matchGoalsTotal), 56, y, 22, textMain);
     y += 44;
 
     if (best) {
@@ -236,7 +236,17 @@ void DrawAboutScreen(Vector2 mouse, int screenW, int screenH, bool* goBack) {
     DrawText("League table: add clubs, sort, and adjust points and goals.", 48, y, 20, textMain);
     y += 28;
     DrawText("Other screens preview live boards, fixtures, and season rollups.", 48, y, 20, textMain);
-    y += 40;
+    y += 36;
+    DrawText("Algorithms (back-end):", 48, y, 22, GetColor(0x14532DFF));
+    y += 28;
+    DrawText("- Quick Sort by points | std::sort for goals and name", 56, y, 18, textMain);
+    y += 24;
+    DrawText("- Linear + Binary Search (name sort) + partial name match", 56, y, 18, textMain);
+    y += 24;
+    DrawText("- Recursion: total goals, points, and demo match series", 56, y, 18, textMain);
+    y += 36;
+    DrawText("Three-tier: presentation -> logic -> data (database.bin)", 48, y, 18, textMain);
+    y += 28;
     DrawText("BinaryBeasts — built with raylib", 48, y, 18, GetColor(0x6B7280FF));
 
     if (goBack) *goBack = back;
