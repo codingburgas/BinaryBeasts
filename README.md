@@ -192,26 +192,21 @@ Binary read/write of `Team` records to `database.bin`
 
 ---
 
-Пълна проектна документация и презентация за защита:
 
-| Ресурс | Файл | Действие |
-| ------ | ---- | -------- |
-| 📊 **Презентация** | [`BinaryBeasts.pptx`](docs/BinaryBeasts.pptx) | [Изтегли / отвори](docs/BinaryBeasts.pptx) |
-| 📝 **Документация** | [`BinaryBeasts.docx`](docs/BinaryBeasts.docx) | [Изтегли / отвори](docs/BinaryBeasts.docx) |
+
+| Ресурс | Преглед в браузър | Изтегляне |
+| ------ | ----------------- | --------- |
+| 📊 **Презентация** | [Отвори](https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.pptx) | [`.pptx`](https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.pptx) |
+| 📝 **Документация** | [Отвори](https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.docx) | [`.docx`](https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.docx) |
 
 <div align="center">
 
 <br>
 
-<a href="docs/BinaryBeasts.pptx"><img src="https://img.shields.io/badge/Презентация-Отвори-B7472A?style=for-the-badge&logo=microsoftpowerpoint&logoColor=white" alt="Open presentation" /></a>
-<a href="docs/BinaryBeasts.docx"><img src="https://img.shields.io/badge/Документация-Отвори-2B579A?style=for-the-badge&logo=microsoftword&logoColor=white" alt="Open documentation" /></a>
+<a href="https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.pptx"><img src="https://img.shields.io/badge/Презентация-Преглед-B7472A?style=for-the-badge&logo=microsoftpowerpoint&logoColor=white" alt="View presentation" /></a>
+<a href="https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/codingburgas/BinaryBeasts/main/docs/BinaryBeasts.docx"><img src="https://img.shields.io/badge/Документация-Преглед-2B579A?style=for-the-badge&logo=microsoftword&logoColor=white" alt="View documentation" /></a>
 
 </div>
-
-> След качване в GitHub можеш да ползваш и Office Online преглед (смени `YOUR_USER` с твоето потребителско име):
->
-> - [Презентация в браузър](https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/YOUR_USER/BinaryBeasts/main/docs/BinaryBeasts.pptx)
-> - [Документация в браузър](https://view.officeapps.live.com/op/view.aspx?src=https://raw.githubusercontent.com/YOUR_USER/BinaryBeasts/main/docs/BinaryBeasts.docx)
 
 ---
 
