@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="assets/logo.png" width="300" height="300" alt="BinaryBeasts Logo">
+
 
 # ⚽ BinaryBeasts — Pitch & Score
+
+<img src="assets/logo.png" width="300" height="300" alt="BinaryBeasts Logo">
 
 ![Version](https://img.shields.io/badge/version-1.0-blue)
 ![Language](https://img.shields.io/badge/language-C++-00599C?logo=cplusplus)
@@ -17,32 +19,49 @@
 
 <div align="center">
 
-## 📋 Table of Contents
+# 📋 Table of Contents
 
-* [🎯 About the Project](#about-the-project)
-* [🏆 League Standings (Presentation)](#league-standings-presentation)
-* [🚀 Core Features](#core-features)
-* [🛠️ Used Technologies](#technologies)
-* [📊 System Overview](#system-overview)
-* [👥 Contributors](#contributors)
-* [📥 Installation](#installation)
-* [▶️ Run the App](#run-the-app)
+[🎯 About the Project](#-about-the-project)
+
+[🏆 League Standings (Presentation)](#-league-standings-presentation)
+
+[🚀 Core Features](#-core-features)
+
+[🛠️ Used Technologies](#️-used-technologies)
+
+[📊 System Overview](#-system-overview)
+
+[👥 Contributors](#-contributors)
+
+[📦 Setup](#-setup)
+
+[▶️ Run the App](#️-run-the-app)
+
+</div>
 
 ---
 
 <div align="center">
-<h2 id="about-the-project">🎯 About the Project</h2>
-</motion.div>
+
+# 🎯 About the Project
+
+</div>
+
+---
 
 **BinaryBeasts (Pitch & Score)** is a C++ desktop app built with **raylib**. It follows a **three-tier architecture**: `presentation` → `logic` → `data`.
 
 ### ✨ What users can do
 
-* 🏆 Manage the **League Standings** table (add, edit, sort, search teams)
-* 🔴 Preview **Live scores** (simulated from team data)
-* 📅 Browse a **Match schedule** (generated fixtures)
-* 📈 View **Season stats** (recursive totals)
-* 💾 Persist teams in `database.bin` between sessions
+🏆 Manage the **League Standings** table (add, edit, sort, search teams)
+
+🔴 Preview **Live scores** (simulated from team data)
+
+📅 Browse a **Match schedule** (generated fixtures)
+
+📈 View **Season stats** (recursive totals)
+
+💾 Persist teams in `database.bin` between sessions
 
 ### 🧩 Main menu screens (`football_menu.cpp`)
 
@@ -58,8 +77,12 @@
 ---
 
 <div align="center">
-<h2 id="league-standings-presentation">🏆 League Standings (Presentation)</h2>
-</motion.div>
+
+# 🏆 League Standings (Presentation)
+
+</div>
+
+---
 
 The **League Standings** screen is drawn in `presentation.cpp` (`run_app`). Window title: **Pitch & Score** (1200×800). Main panel title: **LEAGUE STANDINGS**.
 
@@ -82,7 +105,7 @@ Each team is shown as a **card row** with these columns (same labels as in the U
 | ≥ 18 | Elite |
 | ≥ 10 | Strong |
 | ≥ 4 | Rising |
-| &lt; 4 | Developing |
+| < 4 | Developing |
 
 ### Sidebar (`presentation.cpp`)
 
@@ -130,31 +153,44 @@ On first run, `presentation.cpp` seeds: **Real Madrid**, **FC Barcelona**, **Man
 ---
 
 <div align="center">
-<h2 id="core-features">🚀 Core Features</h2>
-</motion.div>
+
+# 🚀 Core Features
+
+</div>
+
+---
 
 ### 🧭 Presentation layer
 
-* `presentation.cpp` — main loop, League Standings UI, modals, search highlight
-* `football_menu.cpp` — main menu and sub-screens (live, schedule, stats, about)
+`presentation.cpp` — main loop, League Standings UI, modals, search highlight
+
+`football_menu.cpp` — main menu and sub-screens (live, schedule, stats, about)
 
 ### 🧠 Logic layer (`logic.cpp`)
 
-* **Sort:** Quick Sort (points), `std::sort` (goals, name)
-* **Search:** linear, binary (name sort), partial name match
-* **Recursion:** total goals, total points, demo match goals series
-* **Persistence:** `load_teams_logic` / `persist_teams_logic` → `data` layer
+**Sort:** Quick Sort (points), `std::sort` (goals, name)
+
+**Search:** linear, binary (name sort), partial name match
+
+**Recursion:** total goals, total points, demo match goals series
+
+**Persistence:** `load_teams_logic` / `persist_teams_logic` → `data` layer
 
 ### 💾 Data layer (`data.cpp`)
 
-* Binary read/write of `Team` records to `database.bin`
+Binary read/write of `Team` records to `database.bin`
 
 ---
 
 <div align="center">
-<h2 id="technologies">🛠️ Used Technologies</h2>
 
-<br>
+# 🛠️ Used Technologies
+
+</div>
+
+---
+
+<div align="center">
 
 <a href="https://cplusplus.com/"><img src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white&style=for-the-badge" /></a>
 <a href="https://www.raylib.com/"><img src="https://img.shields.io/badge/raylib-111111?logo=raylib&logoColor=white&style=for-the-badge" /></a>
@@ -162,12 +198,17 @@ On first run, `presentation.cpp` seeds: **Real Madrid**, **FC Barcelona**, **Man
 <a href="https://www.nuget.org/"><img src="https://img.shields.io/badge/NuGet-004880?logo=nuget&logoColor=white&style=for-the-badge" /></a>
 <a href="https://github.com/"><img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white&style=for-the-badge" /></a>
 
+</div>
 
 ---
 
 <div align="center">
-<h2 id="system-overview">📊 System Overview</h2>
-</motion.div>
+
+# 📊 System Overview
+
+</div>
+
+---
 
 | Component | Layer | Responsibility |
 | --------- | ----- | -------------- |
@@ -178,7 +219,7 @@ On first run, `presentation.cpp` seeds: **Real Madrid**, **FC Barcelona**, **Man
 | `logic.cpp` | Logic | Sort, search, recursion, persist wrappers |
 | `data.cpp` | Data | `database.bin` load/save |
 
-```
+```txt
 Presentation  →  Logic  →  Data
 (presentation,     (logic.cpp)   (data.cpp,
  football_menu)                  database.bin)
@@ -187,19 +228,23 @@ Presentation  →  Logic  →  Data
 ---
 
 <div align="center">
-<h2 id="contributors">👥 Contributors</h2>
-</motion.div>
+
+# 👥 Contributors
+
+</div>
+
+---
 
 <table>
   <tr>
     <td align="center" width="250">
       <img src="assets/Picture1.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 1"><br><br>
-      <b>Мирослав Илиев </b><br>
+      <b>Мирослав Илиев</b><br>
       <sub>🎯 Scrum Trainer</sub>
     </td>
     <td align="center" width="250">
       <img src="assets/Picture2.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 2"><br><br>
-      <b>Йордан Райнов </b><br>
+      <b>Йордан Райнов</b><br>
       <sub>⚙️ Front-End Developer</sub>
     </td>
   </tr>
@@ -207,12 +252,12 @@ Presentation  →  Logic  →  Data
   <tr>
     <td align="center" width="250">
       <img src="assets/Picture3.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 3"><br><br>
-      <b>Димитър Нягалов </b><br>
+      <b>Димитър Нягалов</b><br>
       <sub>⚙️ Back-End Developer</sub>
     </td>
     <td align="center" width="250">
       <img src="assets/Picture4.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 4"><br><br>
-      <b>Ивн Трифанов </b><br>
+      <b>Иван Трифанов</b><br>
       <sub>🎨 Back-End Developer</sub>
     </td>
   </tr>
@@ -220,32 +265,51 @@ Presentation  →  Logic  →  Data
 
 ---
 
+<div align="center">
+
+# 📦 Setup
+
+</div>
+
+---
 
 ### ⚙️ Requirements
 
-* Windows
-* Visual Studio 2022 (MSVC v143)
-* NuGet package restore enabled
-* Git
+Windows
 
-### 📦 Setup
+Visual Studio 2022 (MSVC v143)
+
+NuGet package restore enabled
+
+Git
+
+### 📥 Installation
 
 ```bash
 git clone https://github.com/<your-username>/BinaryBeasts.git
 cd BinaryBeasts
 ```
 
-1. Open `BinaryBeasts.sln` in Visual Studio.
-2. Restore NuGet packages (raylib in `packages.config`).
-3. Select `Debug | x64` (or your configuration).
-4. Build the solution.
+Open `BinaryBeasts.sln` in Visual Studio.
+
+Restore NuGet packages (raylib in `packages.config`).
+
+Select `Debug | x64` (or your configuration).
+
+Build the solution.
 
 ---
 
 <div align="center">
-<h2 id="run-the-app">▶️ Run the App</h2>
-</motion.div>
 
-* Run with **F5** / **Ctrl+F5** from Visual Studio.
-* Home menu: **Pitch & Score** → open **League table & points**.
-* Changes are saved to `database.bin` on edit and on exit.
+# ▶️ Run the App
+
+</div>
+
+---
+
+Run with **F5** / **Ctrl+F5** from Visual Studio.
+
+Home menu: **Pitch & Score** → open **League table & points**.
+
+Changes are saved to `database.bin` on edit and on exit.
