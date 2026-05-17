@@ -1,6 +1,8 @@
 #include "team_ui.h"
 #include <cstring>
 
+using namespace std;
+
 int DrawTeamCard(const Team& team, int y, int cardWidth, int cardHeight, int nameX, int pointsX, int goalsX, int editX, bool showEdit, int fontSize, Vector2 mouse, bool* editClicked) {
     // Card shadow
     DrawRectangleRounded(Rectangle{(float)nameX-60+4, (float)y+8, (float)cardWidth-8, (float)cardHeight-8}, 0.22f, 12, Fade(BLACK, 0.08f));

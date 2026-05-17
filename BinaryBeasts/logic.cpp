@@ -4,28 +4,30 @@
 #include <algorithm>
 #include <cstdlib>
 
-static int partition_points_desc(std::vector<Team>& teams, int low, int high) {
+using namespace std;
+
+static int partitionPointsDesc(vector<Team>& teams, int low, int high) {
     int pivot = teams[high].points;
     int i = (low - 1);
     for (int j = low; j <= high - 1; j++) {
         if (teams[j].points > pivot) {
             i++;
-            std::swap(teams[i], teams[j]);
+            swap(teams[i], teams[j]);
         }
     }
-    std::swap(teams[i + 1], teams[high]);
+    swap(teams[i + 1], teams[high]);
     return (i + 1);
 }
 
-static void quick_sort_points_desc(std::vector<Team>& teams, int low, int high) {
+static void quickSortPointsDesc(vector<Team>& teams, int low, int high) {
     if (low < high) {
-        int pi = partition_points_desc(teams, low, high);
-        quick_sort_points_desc(teams, low, pi - 1);
-        quick_sort_points_desc(teams, pi + 1, high);
+        int pi = partitionPointsDesc(teams, low, high);
+        quickSortPointsDesc(teams, low, pi - 1);
+        quickSortPointsDesc(teams, pi + 1, high);
     }
 }
 
-void add_team_logic(std::vector<Team>& teams, const char* name) {
+void addTeamLogic(vector<Team>& teams, const char* name) {
     if (strlen(name) < 1) return;
     Team t;
     t.id = (int)teams.size() + 1;
@@ -36,33 +38,33 @@ void add_team_logic(std::vector<Team>& teams, const char* name) {
     teams.push_back(t);
 }
 
-void delete_last_team_logic(std::vector<Team>& teams) {
+void deleteLastTeamLogic(vector<Team>& teams) {
     if (!teams.empty()) teams.pop_back();
 }
 
-void clear_all_teams_logic(std::vector<Team>& teams) {
+void clearAllTeamsLogic(vector<Team>& teams) {
     teams.clear();
 }
 
-void persist_teams_logic(const std::vector<Team>& teams) {
-    save_data(teams);
+void persistTeamsLogic(const vector<Team>& teams) {
+    saveData(teams);
 }
 
-std::vector<Team> load_teams_logic() {
-    return load_data();
+vector<Team> loadTeamsLogic() {
+    return loadData();
 }
 
-int calculate_total_goals_recursive(const std::vector<Match>& matches, int n) {
+int calculateTotalGoalsRecursive(const vector<Match>& matches, int n) {
     if (n <= 0) return 0;
-    return (matches[n - 1].scoreA + matches[n - 1].scoreB) + calculate_total_goals_recursive(matches, n - 1);
+    return (matches[n - 1].scoreA + matches[n - 1].scoreB) + calculateTotalGoalsRecursive(matches, n - 1);
 }
 
-int calculate_total_goals_from_teams_recursive(const std::vector<Team>& teams, int n) {
+int calculateTotalGoalsFromTeamsRecursive(const vector<Team>& teams, int n) {
     if (n <= 0) return 0;
-    return teams[n - 1].goalsScored + calculate_total_goals_from_teams_recursive(teams, n - 1);
+    return teams[n - 1].goalsScored + calculateTotalGoalsFromTeamsRecursive(teams, n - 1);
 }
 
-static void to_lower_copy(const char* src, char* dst, int dstSize) {
+static void toLowerCopy(const char* src, char* dst, int dstSize) {
     int i = 0;
     for (; src[i] != '\0' && i < dstSize - 1; ++i) {
         char c = src[i];
@@ -72,16 +74,16 @@ static void to_lower_copy(const char* src, char* dst, int dstSize) {
     dst[i] = '\0';
 }
 
-static int name_contains_ignore_case(const char* teamName, const char* query) {
+static int nameContainsIgnoreCase(const char* teamName, const char* query) {
     if (query == nullptr || query[0] == '\0') return 0;
     char nameBuf[64];
     char queryBuf[64];
-    to_lower_copy(teamName, nameBuf, (int)sizeof(nameBuf));
-    to_lower_copy(query, queryBuf, (int)sizeof(queryBuf));
+    toLowerCopy(teamName, nameBuf, (int)sizeof(nameBuf));
+    toLowerCopy(query, queryBuf, (int)sizeof(queryBuf));
     return strstr(nameBuf, queryBuf) != nullptr;
 }
 
-int find_team_by_name_linear_logic(const std::vector<Team>& teams, const char* name) {
+int findTeamByNameLinearLogic(const vector<Team>& teams, const char* name) {
     if (name == nullptr || name[0] == '\0') return -1;
     for (int i = 0; i < (int)teams.size(); ++i) {
         if (strcmp(teams[i].name, name) == 0) return i;
@@ -89,7 +91,7 @@ int find_team_by_name_linear_logic(const std::vector<Team>& teams, const char* n
     return -1;
 }
 
-int find_team_by_name_binary_logic(const std::vector<Team>& teams, const char* name) {
+int findTeamByNameBinaryLogic(const vector<Team>& teams, const char* name) {
     if (name == nullptr || name[0] == '\0') return -1;
     int low = 0;
     int high = (int)teams.size() - 1;
@@ -103,21 +105,21 @@ int find_team_by_name_binary_logic(const std::vector<Team>& teams, const char* n
     return -1;
 }
 
-int find_team_by_name_partial_logic(const std::vector<Team>& teams, const char* query) {
+int findTeamByNamePartialLogic(const vector<Team>& teams, const char* query) {
     if (query == nullptr || query[0] == '\0') return -1;
     for (int i = 0; i < (int)teams.size(); ++i) {
-        if (name_contains_ignore_case(teams[i].name, query)) return i;
+        if (nameContainsIgnoreCase(teams[i].name, query)) return i;
     }
     return -1;
 }
 
-int calculate_total_points_recursive(const std::vector<Team>& teams, int n) {
+int calculateTotalPointsRecursive(const vector<Team>& teams, int n) {
     if (n <= 0) return 0;
-    return teams[n - 1].points + calculate_total_points_recursive(teams, n - 1);
+    return teams[n - 1].points + calculateTotalPointsRecursive(teams, n - 1);
 }
 
-int calculate_demo_match_goals_total_logic(const std::vector<Team>& teams) {
-    std::vector<Match> matches;
+int calculateDemoMatchGoalsTotalLogic(const vector<Team>& teams) {
+    vector<Match> matches;
     int n = (int)teams.size();
     if (n < 2) return 0;
     int pairCount = n - 1;
@@ -128,21 +130,21 @@ int calculate_demo_match_goals_total_logic(const std::vector<Team>& teams) {
         m.scoreB = teams[(i + 1) % n].goalsScored % 5;
         matches.push_back(m);
     }
-    return calculate_total_goals_recursive(matches, (int)matches.size());
+    return calculateTotalGoalsRecursive(matches, (int)matches.size());
 }
 
-void sort_teams_by_mode_logic(std::vector<Team>& teams, int sortMode) {
+void sortTeamsByModeLogic(vector<Team>& teams, int sortMode) {
     if (teams.size() <= 1) return;
 
     if (sortMode == 0) {
-        quick_sort_points_desc(teams, 0, (int)teams.size() - 1);
+        quickSortPointsDesc(teams, 0, (int)teams.size() - 1);
     } else if (sortMode == 1) {
-        std::sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
+        sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
             if (a.goalsScored == b.goalsScored) return a.points > b.points;
             return a.goalsScored > b.goalsScored;
         });
     } else {
-        std::sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
+        sort(teams.begin(), teams.end(), [](const Team& a, const Team& b) {
             return strcmp(a.name, b.name) < 0;
         });
     }

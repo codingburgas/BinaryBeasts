@@ -1,6 +1,8 @@
 #include "football_menu.h"
 #include "logic.h"
 
+using namespace std;
+
 static void DrawFittedCenter(const char* text, Rectangle box, int startFont, int minFont, Color color) {
     int fontSize = startFont;
     while (MeasureText(text, fontSize) > (int)box.width - 16 && fontSize > minFont) fontSize--;
@@ -183,9 +185,9 @@ void DrawSeasonStatsScreen(const std::vector<Team>& teams, Vector2 mouse, int sc
     int y = 80;
     Color textMain = GetColor(0x111827FF);
 
-    int totalGoals = calculate_total_goals_from_teams_recursive(teams, (int)teams.size());
-    int totalPts = calculate_total_points_recursive(teams, (int)teams.size());
-    int matchGoalsTotal = calculate_demo_match_goals_total_logic(teams);
+    int totalGoals = calculateTotalGoalsFromTeamsRecursive(teams, (int)teams.size());
+    int totalPts = calculateTotalPointsRecursive(teams, (int)teams.size());
+    int matchGoalsTotal = calculateDemoMatchGoalsTotalLogic(teams);
     float avgGoals = teams.empty() ? 0.0f : (float)totalGoals / (float)teams.size();
 
     const Team* best = nullptr;

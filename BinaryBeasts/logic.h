@@ -4,18 +4,18 @@
 #include "data.h"
 #include <vector>
 
-void add_team_logic(std::vector<Team>& teams, const char* name);
-void sort_teams_by_mode_logic(std::vector<Team>& teams, int sortMode);
-int find_team_by_name_linear_logic(const std::vector<Team>& teams, const char* name);
-int find_team_by_name_binary_logic(const std::vector<Team>& teams, const char* name);
-int find_team_by_name_partial_logic(const std::vector<Team>& teams, const char* query);
-int calculate_total_goals_recursive(const std::vector<Match>& matches, int n);
-int calculate_total_goals_from_teams_recursive(const std::vector<Team>& teams, int n);
-int calculate_total_points_recursive(const std::vector<Team>& teams, int n);
-int calculate_demo_match_goals_total_logic(const std::vector<Team>& teams);
-void delete_last_team_logic(std::vector<Team>& teams);
-void clear_all_teams_logic(std::vector<Team>& teams);
-void persist_teams_logic(const std::vector<Team>& teams);
-std::vector<Team> load_teams_logic();
+void addTeamLogic(std::vector<Team>& teams, const char* name);
+void sortTeamsByModeLogic(std::vector<Team>& teams, int sortMode);
+int findTeamByNameLinearLogic(const std::vector<Team>& teams, const char* name);
+int findTeamByNameBinaryLogic(const std::vector<Team>& teams, const char* name);
+int findTeamByNamePartialLogic(const std::vector<Team>& teams, const char* query);
+int calculateTotalGoalsRecursive(const std::vector<Match>& matches, int n);
+int calculateTotalGoalsFromTeamsRecursive(const std::vector<Team>& teams, int n);
+int calculateTotalPointsRecursive(const std::vector<Team>& teams, int n);
+int calculateDemoMatchGoalsTotalLogic(const std::vector<Team>& teams);
+void deleteLastTeamLogic(std::vector<Team>& teams);
+void clearAllTeamsLogic(std::vector<Team>& teams);
+void persistTeamsLogic(const std::vector<Team>& teams);
+std::vector<Team> loadTeamsLogic();
 
 #endif

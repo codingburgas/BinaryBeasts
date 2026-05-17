@@ -15,7 +15,7 @@ struct Match {
     int scoreB;
 };
 
-void save_data(const std::vector<Team>& teams);
-std::vector<Team> load_data();
+void saveData(const std::vector<Team>& teams);
+std::vector<Team> loadData();
 
 #endif

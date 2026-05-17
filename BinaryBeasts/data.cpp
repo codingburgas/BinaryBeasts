@@ -2,8 +2,10 @@
 #include "data.h"
 #include <fstream>
 
-void save_data(const std::vector<Team>& teams) {
-    std::ofstream file("database.bin", std::ios::binary | std::ios::trunc);
+using namespace std;
+
+void saveData(const vector<Team>& teams) {
+    ofstream file("database.bin", ios::binary | ios::trunc);
     if (file.is_open()) {
         for (const auto& t : teams) {
             file.write((const char*)&t, sizeof(Team));
@@ -12,9 +14,9 @@ void save_data(const std::vector<Team>& teams) {
     }
 }
 
-std::vector<Team> load_data() {
-    std::vector<Team> teams;
-    std::ifstream file("database.bin", std::ios::binary);
+vector<Team> loadData() {
+    vector<Team> teams;
+    ifstream file("database.bin", ios::binary);
     if (!file.is_open()) return teams;
 
     Team t;

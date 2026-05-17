@@ -1,6 +1,6 @@
 #include "presentation.h"
 
 int main() {
-    run_app();
+    runApp();
     return 0;
-}   
+}

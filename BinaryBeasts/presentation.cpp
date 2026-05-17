@@ -6,12 +6,14 @@
 #include <cstdlib>
 #include <cstring>
 
-static int search_team_index_logic(const std::vector<Team>& teams, const char* query, int sortMode) {
+using namespace std;
+
+static int searchTeamIndexLogic(const vector<Team>& teams, const char* query, int sortMode) {
     if (query == nullptr || query[0] == '\0') return -1;
     int idx = -1;
-    if (sortMode == 2) idx = find_team_by_name_binary_logic(teams, query);
-    else idx = find_team_by_name_linear_logic(teams, query);
-    if (idx < 0) idx = find_team_by_name_partial_logic(teams, query);
+    if (sortMode == 2) idx = findTeamByNameBinaryLogic(teams, query);
+    else idx = findTeamByNameLinearLogic(teams, query);
+    if (idx < 0) idx = findTeamByNamePartialLogic(teams, query);
     return idx;
 }
 
@@ -69,7 +71,7 @@ static const char* GetScoreTier(const Team& team) {
     return "Developing";
 }
 
-void run_app() {
+void runApp() {
     InitWindow(1200, 800, "Pitch & Score");
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -78,13 +80,13 @@ void run_app() {
     AppScreen screen = AppScreen::MainMenu;
     bool shouldQuit = false;
 
-    std::vector<Team> teams = load_teams_logic();
+    vector<Team> teams = loadTeamsLogic();
 
     // Начални данни, ако файлът е празен
     if (teams.empty()) {
-        add_team_logic(teams, "Real Madrid");
-        add_team_logic(teams, "FC Barcelona");
-        add_team_logic(teams, "Manchester City");
+        addTeamLogic(teams, "Real Madrid");
+        addTeamLogic(teams, "FC Barcelona");
+        addTeamLogic(teams, "Manchester City");
     }
 
     char inputBuf[50] = "\0";
@@ -128,8 +130,8 @@ void run_app() {
                     if (inputBuf[i] < 32) valid = 0;
                 }
                 if (valid) {
-                    add_team_logic(teams, inputBuf);
-                    persist_teams_logic(teams);
+                    addTeamLogic(teams, inputBuf);
+                    persistTeamsLogic(teams);
                 }
                 inputBuf[0] = '\0'; letterCount = 0;
                 showAddModal = false;
@@ -142,10 +144,10 @@ void run_app() {
         } else if (screen == AppScreen::LeagueStandings) {
             if (IsKeyPressed(KEY_F1) && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
-                sort_teams_by_mode_logic(teams, sortMode);
+                sortTeamsByModeLogic(teams, sortMode);
             }
-            if (IsKeyPressed(KEY_F2)) { delete_last_team_logic(teams); persist_teams_logic(teams); foundTeamIndex = -1; }
-            if (IsKeyPressed(KEY_F3)) { clear_all_teams_logic(teams); persist_teams_logic(teams); foundTeamIndex = -1; }
+            if (IsKeyPressed(KEY_F2)) { deleteLastTeamLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
+            if (IsKeyPressed(KEY_F3)) { clearAllTeamsLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
             if (!showEditModal && !showAddModal) {
                 int searchKey = GetCharPressed();
                 while (searchKey > 0) {
@@ -160,7 +162,7 @@ void run_app() {
                     searchBuf[--searchLetterCount] = '\0';
                 }
                 if (searchInputActive && IsKeyPressed(KEY_ENTER)) {
-                    foundTeamIndex = search_team_index_logic(teams, searchBuf, sortMode);
+                    foundTeamIndex = searchTeamIndexLogic(teams, searchBuf, sortMode);
                 }
             }
         }
@@ -314,10 +316,10 @@ void run_app() {
             if (btnHovers[0]) { showAddModal = true; inputActive = true; }
             if (btnHovers[1] && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
-                sort_teams_by_mode_logic(teams, sortMode);
+                sortTeamsByModeLogic(teams, sortMode);
             }
-            if (btnHovers[2]) { delete_last_team_logic(teams); persist_teams_logic(teams); foundTeamIndex = -1; }
-            if (btnHovers[3]) { clear_all_teams_logic(teams); persist_teams_logic(teams); foundTeamIndex = -1; }
+            if (btnHovers[2]) { deleteLastTeamLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
+            if (btnHovers[3]) { clearAllTeamsLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
         }
 
         Rectangle searchBox{50, 612, 160, 38};
@@ -359,7 +361,7 @@ void run_app() {
             if (foundTeamIndex >= maxTeamsShown) {
                 listStart = foundTeamIndex - maxTeamsShown + 1;
             }
-            int listEnd = std::min(listStart + maxTeamsShown, (int)teams.size());
+            int listEnd = min(listStart + maxTeamsShown, (int)teams.size());
             for (int i = listStart; i < listEnd; i++) {
                 int y = MAIN_Y + 156 + ((i - listStart) * 88);
                 bool isFound = (foundTeamIndex == i);
@@ -403,8 +405,8 @@ void run_app() {
                 DrawText("-", (int)minusPointBtn.x + 6, (int)minusPointBtn.y - 1, 20, textMain);
                 DrawText("+", (int)plusPointBtn.x + 4, (int)plusPointBtn.y - 1, 20, textMain);
                 if (!showAddModal && !showEditModal && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    if (CheckCollisionPointRec(mouse, minusPointBtn) && teams[i].points > 0) { teams[i].points--; persist_teams_logic(teams); }
-                    if (CheckCollisionPointRec(mouse, plusPointBtn)) { teams[i].points++; persist_teams_logic(teams); }
+                    if (CheckCollisionPointRec(mouse, minusPointBtn) && teams[i].points > 0) { teams[i].points--; persistTeamsLogic(teams); }
+                    if (CheckCollisionPointRec(mouse, plusPointBtn)) { teams[i].points++; persistTeamsLogic(teams); }
                 }
                 // Edit button (pencil icon)
                 Rectangle editBtn = Rectangle{(float)CARD_X + 852, (float)y + 14, 36, 36};
@@ -433,7 +435,7 @@ void run_app() {
         // Footer
         DrawRectangleRounded(Rectangle{(float)FOOTER_X, (float)FOOTER_Y, (float)FOOTER_W, (float)FOOTER_H}, 0.08f, 8, GetColor(0xE5E7EBFF));
         // Dynamic total goals from teams
-        int totalGoals = calculate_total_goals_from_teams_recursive(teams, (int)teams.size());
+        int totalGoals = calculateTotalGoalsFromTeamsRecursive(teams, (int)teams.size());
         DrawText(TextFormat("Total Goals: %d", totalGoals), FOOTER_X + 26, FOOTER_Y + 20, FONT_SECTION, textMain);
         DrawText("Main menu: sidebar | F1: Sort | F2: Delete last | F3: Clear all", FOOTER_X + 340, FOOTER_Y + 24, FONT_META, textMuted);
         DrawText("Search: ENTER (binary if sorted by name) | partial match OK", FOOTER_X + 340, FOOTER_Y + 46, FONT_META, textMuted);
@@ -515,7 +517,7 @@ void run_app() {
                 strncpy_s(teams[editTeamIdx].name, sizeof(teams[editTeamIdx].name), editNameBuf, 49); teams[editTeamIdx].name[49] = '\0';
                 teams[editTeamIdx].goalsScored = editGoals;
                 teams[editTeamIdx].points = editPoints;
-                persist_teams_logic(teams);
+                persistTeamsLogic(teams);
                 showEditModal = false; editTeamIdx = -1;
             }
             // Keyboard input
@@ -558,6 +560,6 @@ void run_app() {
 
         EndDrawing();
     }
-    persist_teams_logic(teams);
+    persistTeamsLogic(teams);
     CloseWindow();
 }
