@@ -8,13 +8,74 @@
 
 using namespace std;
 
+static const Rectangle SEARCH_BOX{48, 598, 210, 48};
+static const int SEARCH_FONT = 20;
+
 static int searchTeamIndexLogic(const vector<Team>& teams, const char* query, int sortMode) {
     if (query == nullptr || query[0] == '\0') return -1;
-    int idx = -1;
-    if (sortMode == 2) idx = findTeamByNameBinaryLogic(teams, query);
-    else idx = findTeamByNameLinearLogic(teams, query);
-    if (idx < 0) idx = findTeamByNamePartialLogic(teams, query);
+    int idx = findTeamByNamePartialLogic(teams, query);
+    if (idx < 0) {
+        if (sortMode == 2) idx = findTeamByNameBinaryLogic(teams, query);
+        else idx = findTeamByNameLinearLogic(teams, query);
+    }
     return idx;
+}
+
+static void runLiveSearch(const vector<Team>& teams, const char* query, int sortMode, int* foundTeamIndex) {
+    if (foundTeamIndex == nullptr) return;
+    *foundTeamIndex = (query != nullptr && query[0] != '\0')
+        ? searchTeamIndexLogic(teams, query, sortMode)
+        : -1;
+}
+
+static void updateSearchField(
+    char* buf, int bufSize, bool* active, int* foundTeamIndex,
+    const vector<Team>& teams, int sortMode, Vector2 mouse)
+{
+    if (active == nullptr || buf == nullptr || foundTeamIndex == nullptr) return;
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        *active = CheckCollisionPointRec(mouse, SEARCH_BOX);
+    }
+    if (IsKeyPressed(KEY_SLASH)) {
+        *active = true;
+    }
+
+    int len = (int)strlen(buf);
+
+    if (*active && IsKeyPressed(KEY_ESCAPE)) {
+        buf[0] = '\0';
+        *active = false;
+        *foundTeamIndex = -1;
+        return;
+    }
+    if (*active && IsKeyPressed(KEY_DELETE)) {
+        buf[0] = '\0';
+        len = 0;
+        *foundTeamIndex = -1;
+    }
+    if (*active && (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))) {
+        if (len > 0) {
+            buf[len - 1] = '\0';
+            len--;
+        }
+    }
+
+    int key = GetCharPressed();
+    while (key > 0) {
+        if (key == '/') {
+            *active = true;
+        } else if (key >= 32 && key <= 125) {
+            if (!*active) *active = true;
+            if (len < bufSize - 1) {
+                buf[len++] = (char)key;
+                buf[len] = '\0';
+            }
+        }
+        key = GetCharPressed();
+    }
+
+    runLiveSearch(teams, buf, sortMode, foundTeamIndex);
 }
 
 static void DrawFittedText(const char* text, Rectangle box, int startFont, int minFont, Color color, bool centerAlign = true) {
@@ -107,7 +168,6 @@ void runApp() {
     int sortMode = 0;
     const char* sortLabels[3] = {"Sort: Points", "Sort: Goals", "Sort: Name"};
     char searchBuf[50] = "\0";
-    int searchLetterCount = 0;
     bool searchInputActive = false;
     int foundTeamIndex = -1;
     while (!WindowShouldClose() && !shouldQuit) {
@@ -145,25 +205,12 @@ void runApp() {
             if (IsKeyPressed(KEY_F1) && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
                 sortTeamsByModeLogic(teams, sortMode);
+                runLiveSearch(teams, searchBuf, sortMode, &foundTeamIndex);
             }
             if (IsKeyPressed(KEY_F2)) { deleteLastTeamLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
-            if (IsKeyPressed(KEY_F3)) { clearAllTeamsLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
+            if (IsKeyPressed(KEY_F3)) { clearAllTeamsLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; searchBuf[0] = '\0'; }
             if (!showEditModal && !showAddModal) {
-                int searchKey = GetCharPressed();
-                while (searchKey > 0) {
-                    if (searchInputActive && searchLetterCount < 49 && searchKey >= 32 && searchKey <= 125) {
-                        searchBuf[searchLetterCount] = (char)searchKey;
-                        searchBuf[searchLetterCount + 1] = '\0';
-                        searchLetterCount++;
-                    }
-                    searchKey = GetCharPressed();
-                }
-                if (searchInputActive && IsKeyPressed(KEY_BACKSPACE) && searchLetterCount > 0) {
-                    searchBuf[--searchLetterCount] = '\0';
-                }
-                if (searchInputActive && IsKeyPressed(KEY_ENTER)) {
-                    foundTeamIndex = searchTeamIndexLogic(teams, searchBuf, sortMode);
-                }
+                updateSearchField(searchBuf, (int)sizeof(searchBuf), &searchInputActive, &foundTeamIndex, teams, sortMode, GetMousePosition());
             }
         }
 
@@ -317,25 +364,36 @@ void runApp() {
             if (btnHovers[1] && teams.size() > 1) {
                 sortMode = (sortMode + 1) % 3;
                 sortTeamsByModeLogic(teams, sortMode);
+                runLiveSearch(teams, searchBuf, sortMode, &foundTeamIndex);
             }
             if (btnHovers[2]) { deleteLastTeamLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
             if (btnHovers[3]) { clearAllTeamsLogic(teams); persistTeamsLogic(teams); foundTeamIndex = -1; }
         }
 
-        Rectangle searchBox{50, 612, 160, 38};
-        bool searchHover = CheckCollisionPointRec(mouse, searchBox);
-        DrawRectangleRounded(searchBox, 0.2f, 6, searchInputActive ? GetColor(0xE0F2FEFF) : btnColor);
-        DrawRectangleRoundedLinesEx(searchBox, 0.2f, 6, 2.0f, searchHover ? accent : Fade(WHITE, 0.25f));
-        DrawEllipsizedText(searchBuf[0] ? searchBuf : "Search name", Rectangle{56, 616, 148, 30}, 15, WHITE, false);
-        if (!showAddModal && !showEditModal && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            searchInputActive = searchHover;
+        bool searchHover = CheckCollisionPointRec(mouse, SEARCH_BOX);
+        DrawRectangleRounded(SEARCH_BOX, 0.2f, 8, searchInputActive ? GetColor(0xE0F2FEFF) : btnColor);
+        DrawRectangleRoundedLinesEx(SEARCH_BOX, 0.2f, 8, 2.0f, searchInputActive || searchHover ? accent : Fade(WHITE, 0.25f));
+
+        Rectangle searchTextBox{SEARCH_BOX.x + 10, SEARCH_BOX.y + 6, SEARCH_BOX.width - 20, SEARCH_BOX.height - 12};
+        const char* searchPlaceholder = "Search team...";
+        Color searchTextCol = searchInputActive ? textMain : WHITE;
+        if (searchBuf[0]) {
+            DrawEllipsizedText(searchBuf, searchTextBox, SEARCH_FONT, searchTextCol, false);
+            if (searchInputActive && (GetFrameCount() / 30) % 2 == 0) {
+                int cursorX = (int)searchTextBox.x + MeasureText(searchBuf, SEARCH_FONT) + 2;
+                int cursorY = (int)searchTextBox.y + ((int)searchTextBox.height - SEARCH_FONT) / 2;
+                DrawRectangle(cursorX, cursorY, 2, SEARCH_FONT, searchTextCol);
+            }
+        } else {
+            DrawEllipsizedText(searchPlaceholder, searchTextBox, SEARCH_FONT, Fade(WHITE, 0.55f), false);
         }
+
         if (foundTeamIndex >= 0 && foundTeamIndex < (int)teams.size()) {
             DrawEllipsizedText(
                 TextFormat("Found: #%d %s", foundTeamIndex + 1, teams[foundTeamIndex].name),
-                Rectangle{52, 656, 156, 24}, 13, accent, false);
-        } else if (searchBuf[0] != '\0') {
-            DrawEllipsizedText("No match", Rectangle{52, 656, 156, 24}, 14, Fade(WHITE, 0.8f), false);
+                Rectangle{SEARCH_BOX.x, SEARCH_BOX.y + SEARCH_BOX.height + 6, SEARCH_BOX.width, 24}, FONT_META, accent, false);
+        } else if (searchInputActive && searchBuf[0] != '\0') {
+            DrawEllipsizedText("No match", Rectangle{SEARCH_BOX.x, SEARCH_BOX.y + SEARCH_BOX.height + 6, SEARCH_BOX.width, 24}, FONT_META, Fade(WHITE, 0.8f), false);
         }
 
         // Main content area
@@ -437,12 +495,27 @@ void runApp() {
         // Dynamic total goals from teams
         int totalGoals = calculateTotalGoalsFromTeamsRecursive(teams, (int)teams.size());
         DrawText(TextFormat("Total Goals: %d", totalGoals), FOOTER_X + 26, FOOTER_Y + 20, FONT_SECTION, textMain);
-        DrawText("Main menu: sidebar | F1: Sort | F2: Delete last | F3: Clear all", FOOTER_X + 340, FOOTER_Y + 24, FONT_META, textMuted);
-        DrawText("Search: ENTER (binary if sorted by name) | partial match OK", FOOTER_X + 340, FOOTER_Y + 46, FONT_META, textMuted);
-        DrawText("© 2024 BinaryBeasts", FOOTER_X + FOOTER_W - 150, FOOTER_Y + 78, FONT_META, textMuted);
+        DrawEllipsizedText(
+            "Main menu: sidebar | F1: Sort | F2: Delete last | F3: Clear all",
+            Rectangle{(float)FOOTER_X + 280, (float)FOOTER_Y + 22, (float)FOOTER_W - 296, 22},
+            FONT_META, textMuted, false);
+        DrawEllipsizedText(
+            "Search: type to filter | / focus | ESC clear | partial match",
+            Rectangle{(float)FOOTER_X + 280, (float)FOOTER_Y + 44, (float)FOOTER_W - 296, 22},
+            FONT_META, textMuted, false);
+        DrawEllipsizedText(
+            "(c) 2024 BinaryBeasts",
+            Rectangle{(float)FOOTER_X + FOOTER_W - 168, (float)FOOTER_Y + 20, 156, 22},
+            FONT_META, textMuted, false);
 
-        // Score insights panel
-        DrawRectangleRounded(Rectangle{(float)FOOTER_X + 12, (float)FOOTER_Y + 76, (float)FOOTER_W - 24, 24}, 0.25f, 8, GetColor(0xE0F2FEFF));
+        // Score insights panel (bounded text avoids overlap with copyright / window edge)
+        const float insightsBarY = (float)FOOTER_Y + 74;
+        const float insightsBarH = 28.0f;
+        DrawRectangleRounded(
+            Rectangle{(float)FOOTER_X + 12, insightsBarY, (float)FOOTER_W - 24, insightsBarH},
+            0.25f, 8, GetColor(0xE0F2FEFF));
+        Rectangle insightsTextBox{(float)FOOTER_X + 22, insightsBarY + 2, (float)FOOTER_W - 44, insightsBarH - 4};
+        Color insightsText = GetColor(0x0369A1FF);
         if (!teams.empty()) {
             const Team* bestTeam = &teams[0];
             for (const auto& t : teams) {
@@ -453,12 +526,12 @@ void runApp() {
             float avgPoints = 0.0f;
             for (const auto& t : teams) avgPoints += (float)t.points;
             avgPoints /= (float)teams.size();
-            DrawText(
+            DrawEllipsizedText(
                 TextFormat("Leader: %s (%d pts) | Avg points: %.1f | Leader tier: %s",
                     bestTeam->name, bestTeam->points, avgPoints, GetScoreTier(*bestTeam)),
-                FOOTER_X + 22, FOOTER_Y + 79, FONT_META, GetColor(0x0369A1FF));
+                insightsTextBox, FONT_META, insightsText, false);
         } else {
-            DrawText("Add a team to unlock score insights.", FOOTER_X + 22, FOOTER_Y + 79, FONT_META, GetColor(0x0369A1FF));
+            DrawEllipsizedText("Add a team to unlock score insights.", insightsTextBox, FONT_META, insightsText, false);
         }
 
         // Add Team Modal
@@ -479,38 +552,46 @@ void runApp() {
 
         // Edit Team Modal
         if (showEditModal && editTeamIdx >= 0 && editTeamIdx < (int)teams.size()) {
+            const float modalX = 380.0f;
+            const float modalY = 220.0f;
+            const float modalW = 520.0f;
+            const float modalH = 340.0f;
+            const int fieldH = 60;
+            const int labelFieldPadY = (fieldH - FONT_BODY) / 2;
+
             DrawRectangle(0, 0, 1200, 800, Fade(BLACK, 0.38f));
-            // Modal shadow and background (match add modal)
-            DrawRectangleRounded(Rectangle{384, 234, 512, 292}, 0.22f, 12, Fade(BLACK, 0.16f));
-            DrawRectangleRounded(Rectangle{380, 230, 520, 300}, 0.22f, 12, panel);
-            DrawText("Edit Team", 520, 265, FONT_TITLE, textMain);
-            // Name input
-            DrawText("Name:", 420, 340, FONT_BODY, textMain);
-            DrawRectangleRounded(Rectangle{520, 335, 340, 60}, 0.22f, 12, editNameActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
-            DrawEllipsizedText(editNameBuf[0] ? editNameBuf : "Team name...", Rectangle{532, 337, 320, 56}, FONT_BODY, textMain, false);
-            // Goals input
-            DrawText("Goals:", 420, 420, FONT_BODY, textMain);
-            DrawRectangleRounded(Rectangle{520, 415, 140, 60}, 0.22f, 12, editGoalsActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
+            DrawRectangleRounded(Rectangle{modalX + 4, modalY + 4, modalW, modalH}, 0.22f, 12, Fade(BLACK, 0.16f));
+            DrawRectangleRounded(Rectangle{modalX, modalY, modalW, modalH}, 0.22f, 12, panel);
+            DrawText("Edit Team", 520, (int)modalY + 42, FONT_TITLE, textMain);
+
+            const int nameFieldY = (int)modalY + 118;
+            DrawText("Name:", 420, nameFieldY + labelFieldPadY, FONT_BODY, textMain);
+            DrawRectangleRounded(Rectangle{520, (float)nameFieldY, 340, (float)fieldH}, 0.22f, 12, editNameActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
+            DrawEllipsizedText(editNameBuf[0] ? editNameBuf : "Team name...", Rectangle{532, (float)nameFieldY + 2, 320, (float)fieldH - 4}, FONT_BODY, textMain, false);
+
+            const int statFieldY = (int)modalY + 198;
+            DrawText("Goals:", 420, statFieldY + labelFieldPadY, FONT_BODY, textMain);
+            DrawRectangleRounded(Rectangle{520, (float)statFieldY, 140, (float)fieldH}, 0.22f, 12, editGoalsActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
             char goalsShow[16];
             snprintf(goalsShow, 15, "%d", editGoals);
-            DrawEllipsizedText(goalsShow, Rectangle{532, 417, 116, 56}, FONT_BODY, textMain, true);
-            DrawText("Points:", 680, 420, FONT_BODY, textMain);
-            DrawRectangleRounded(Rectangle{790, 415, 70, 60}, 0.22f, 12, editPointsActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
+            DrawEllipsizedText(goalsShow, Rectangle{532, (float)statFieldY + 2, 116, (float)fieldH - 4}, FONT_BODY, textMain, true);
+            DrawText("Points:", 680, statFieldY + labelFieldPadY, FONT_BODY, textMain);
+            DrawRectangleRounded(Rectangle{790, (float)statFieldY, 100, (float)fieldH}, 0.22f, 12, editPointsActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
             char pointsShow[16];
             snprintf(pointsShow, 15, "%d", editPoints);
-            DrawEllipsizedText(pointsShow, Rectangle{798, 417, 54, 56}, FONT_SMALL, textMain, true);
-            // Save button
-            Rectangle saveBtn = Rectangle{700, 500, 140, 48};
+            DrawEllipsizedText(pointsShow, Rectangle{802, (float)statFieldY + 2, 76, (float)fieldH - 4}, FONT_BODY, textMain, true);
+
+            Rectangle saveBtn = Rectangle{modalX + modalW - 180, modalY + modalH - 68, 140, 48};
             DrawRectangleRounded(saveBtn, 0.22f, 12, accent);
-            DrawText("Save", 740, 510, 32, WHITE);
+            DrawText("Save", (int)saveBtn.x + 36, (int)saveBtn.y + 12, FONT_SECTION, WHITE);
             // Input handling
-            if (CheckCollisionPointRec(mouse, Rectangle{520, 335, 340, 60}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, Rectangle{520, (float)nameFieldY, 340, (float)fieldH}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 editNameActive = true; editGoalsActive = false;
             }
-            if (CheckCollisionPointRec(mouse, Rectangle{520, 415, 140, 60}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, Rectangle{520, (float)statFieldY, 140, (float)fieldH}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 editGoalsActive = true; editNameActive = false; editPointsActive = false;
             }
-            if (CheckCollisionPointRec(mouse, Rectangle{790, 415, 70, 60}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, Rectangle{790, (float)statFieldY, 100, (float)fieldH}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 editPointsActive = true; editNameActive = false; editGoalsActive = false;
             }
             if (CheckCollisionPointRec(mouse, saveBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {

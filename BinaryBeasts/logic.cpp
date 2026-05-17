@@ -50,8 +50,24 @@ void persistTeamsLogic(const vector<Team>& teams) {
     saveData(teams);
 }
 
+static bool sanitizeTeamNames(vector<Team>& teams) {
+    bool changed = false;
+    for (auto& t : teams) {
+        if (strcmp(t.name, "Bayern Muchen") == 0) {
+            strncpy(t.name, "Bayern Munchen", sizeof(t.name) - 1);
+            t.name[sizeof(t.name) - 1] = '\0';
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 vector<Team> loadTeamsLogic() {
-    return loadData();
+    vector<Team> teams = loadData();
+    if (sanitizeTeamNames(teams)) {
+        persistTeamsLogic(teams);
+    }
+    return teams;
 }
 
 int calculateTotalGoalsRecursive(const vector<Match>& matches, int n) {

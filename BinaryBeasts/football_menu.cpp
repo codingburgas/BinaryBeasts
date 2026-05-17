@@ -55,7 +55,7 @@ AppScreen UpdateAndDrawMainMenu(Vector2 mouse, int screenW, int screenH) {
     const char* brand = "PITCH & SCORE";
     int bw = MeasureText(brand, 44);
     DrawText(brand, (screenW - bw) / 2, 48, 44, gold);
-    const char* tag = "Football league desk — standings, live, schedule, stats";
+    const char* tag = "Football league desk - standings, live, schedule, stats";
     int tw = MeasureText(tag, 20);
     DrawText(tag, (screenW - tw) / 2, 100, 20, Fade(WHITE, 0.85f));
 
@@ -85,7 +85,7 @@ AppScreen UpdateAndDrawMainMenu(Vector2 mouse, int screenW, int screenH) {
         }
     }
 
-    DrawText("Click a tile to open — ESC exits from menu", startX, screenH - 48, 18, Fade(WHITE, 0.6f));
+    DrawText("Click a tile to open - ESC exits from menu", startX, screenH - 48, 18, Fade(WHITE, 0.6f));
     return AppScreen::MainMenu;
 }
 
@@ -214,7 +214,7 @@ void DrawSeasonStatsScreen(const std::vector<Team>& teams, Vector2 mouse, int sc
         DrawText("Table leader", 48, y, 26, GetColor(0x14532DFF));
         y += 36;
         DrawText(
-            TextFormat("%s — %d pts, %d goals (%s)", best->name, best->points, best->goalsScored, TierLabel(best->points)),
+            TextFormat("%s - %d pts, %d goals (%s)", best->name, best->points, best->goalsScored, TierLabel(best->points)),
             56, y, 22, textMain);
         y += 40;
     }
@@ -249,7 +249,7 @@ void DrawAboutScreen(Vector2 mouse, int screenW, int screenH, bool* goBack) {
     y += 36;
     DrawText("Three-tier: presentation -> logic -> data (database.bin)", 48, y, 18, textMain);
     y += 28;
-    DrawText("BinaryBeasts — built with raylib", 48, y, 18, GetColor(0x6B7280FF));
+    DrawText("BinaryBeasts - built with raylib", 48, y, 18, GetColor(0x6B7280FF));
 
     if (goBack) *goBack = back;
 }
