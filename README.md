@@ -1,13 +1,15 @@
 <div align="center">
 
-# ⚽ BinaryBeasts - Pitch & Score
+<img src="assets/logo.png" width="300" height="300" alt="BinaryBeasts Logo">
+
+# ⚽ BinaryBeasts — Pitch & Score
 
 ![Version](https://img.shields.io/badge/version-1.0-blue)
-![Language](https://img.shields.io/badge/language-C%2B%2B-00599C?logo=cplusplus)
-![Graphics](https://img.shields.io/badge/framework-raylib-2d2d2d?logo=raylib)
+![Language](https://img.shields.io/badge/language-C++-00599C?logo=cplusplus)
+![Graphics](https://img.shields.io/badge/framework-raylib-111111?logo=raylib)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-**A desktop football league manager with interactive screens for standings, scores, fixtures, and season insights**
+**Desktop football league manager — standings, live scores, fixtures, and season stats**
 
 </div>
 
@@ -17,13 +19,12 @@
 
 ## 📋 Table of Contents
 
-</div>
-
 * [🎯 About the Project](#about-the-project)
+* [🏆 League Standings (Presentation)](#league-standings-presentation)
 * [🚀 Core Features](#core-features)
-* [🛠️ Technologies](#technologies)
+* [🛠️ Used Technologies](#technologies)
 * [📊 System Overview](#system-overview)
-* [📁 Project Structure](#project-structure)
+* [👥 Contributors](#contributors)
 * [📥 Installation](#installation)
 * [▶️ Run the App](#run-the-app)
 
@@ -31,86 +32,127 @@
 
 <div align="center">
 <h2 id="about-the-project">🎯 About the Project</h2>
-</div>
+</motion.div>
 
-**BinaryBeasts (Pitch & Score)** is a C++ desktop application built with **raylib** that simulates a football league control desk.
+**BinaryBeasts (Pitch & Score)** is a C++ desktop app built with **raylib**. It follows a **three-tier architecture**: `presentation` → `logic` → `data`.
 
-It lets users manage teams, update table data, and navigate focused views for:
+### ✨ What users can do
 
-* 🏆 League standings
-* 🔴 Live score previews (simulated)
-* 📅 Match schedule
-* 📈 Season statistics
-* ℹ️ About section
+* 🏆 Manage the **League Standings** table (add, edit, sort, search teams)
+* 🔴 Preview **Live scores** (simulated from team data)
+* 📅 Browse a **Match schedule** (generated fixtures)
+* 📈 View **Season stats** (recursive totals)
+* 💾 Persist teams in `database.bin` between sessions
 
-Team data is persisted in a local binary file (`database.bin`) between runs.
+### 🧩 Main menu screens (`football_menu.cpp`)
+
+| Menu item | Screen |
+| --------- | ------ |
+| League table & points | `LeagueStandings` (`presentation.cpp`) |
+| Live scores (simulated) | `LiveScores` |
+| Match schedule | `MatchSchedule` |
+| Season stats | `SeasonStats` |
+| About this app | `About` |
+| Exit | Quit |
+
+---
+
+<div align="center">
+<h2 id="league-standings-presentation">🏆 League Standings (Presentation)</h2>
+</motion.div>
+
+The **League Standings** screen is drawn in `presentation.cpp` (`run_app`). Window title: **Pitch & Score** (1200×800). Main panel title: **LEAGUE STANDINGS**.
+
+### Table columns (card list header)
+
+Each team is shown as a **card row** with these columns (same labels as in the UI):
+
+| Column | Source field | UI behaviour |
+| ------ | ------------ | -------------- |
+| **Team** | `Team.name` | Name + avatar initials + points progress bar vs league leader |
+| **Points** | `Team.points` | Display; **+** / **−** buttons adjust points (saved via `persist_teams_logic`) |
+| **Goals** | `Team.goalsScored` | Display; editable in the Edit modal |
+| **Tier** | derived from `Team.points` | Label from `GetScoreTier()` (see below) |
+| **Edit** | — | Pencil button opens modal: name, goals, points |
+
+### Tier labels (`GetScoreTier` in `presentation.cpp`)
+
+| Points | Tier shown |
+| ------ | ---------- |
+| ≥ 18 | Elite |
+| ≥ 10 | Strong |
+| ≥ 4 | Rising |
+| &lt; 4 | Developing |
+
+### Sidebar (`presentation.cpp`)
+
+| Control | Action |
+| ------- | ------ |
+| **Main menu** | Return to home menu |
+| **Add Team** | Modal: team name → `add_team_logic` |
+| **Sort: Points / Goals / Name** | Cycles `sortMode` 0→1→2 → `sort_teams_by_mode_logic` |
+| **Delete Last** | `delete_last_team_logic` |
+| **Clear All** | `clear_all_teams_logic` |
+| **Search name** | ENTER: linear or binary (if sorted by name) + partial match; highlights found row |
+
+### Keyboard shortcuts (footer hints)
+
+| Key | Action |
+| --- | ------ |
+| **F1** | Cycle sort (points → goals → name) |
+| **F2** | Delete last team |
+| **F3** | Clear all teams |
+| **ENTER** (search box) | Find team; binary search when sorted by name |
+| **ESC** | Close modals / back from sub-screens |
+
+### Footer panel (same screen)
+
+| Element | Description |
+| ------- | ------------- |
+| **Total Goals** | `calculate_total_goals_from_teams_recursive` |
+| **Score insights** | Leader name, points, average points, leader tier |
+| **List hint** | Up to **5** teams visible; `Showing X–Y of N teams` if more exist |
+| **Search result** | `Found: #rank Name` or `No match` under search box |
+
+### Default teams (if `database.bin` is empty)
+
+On first run, `presentation.cpp` seeds: **Real Madrid**, **FC Barcelona**, **Manchester City** (0 points, 0 goals each).
+
+### `Team` record (`data.h`)
+
+| Field | Type | Max / notes |
+| ----- | ---- | ----------- |
+| `id` | `int` | Auto on add |
+| `name` | `char[50]` | 49 chars + null |
+| `points` | `int` | Table points |
+| `goalsScored` | `int` | Season goals |
 
 ---
 
 <div align="center">
 <h2 id="core-features">🚀 Core Features</h2>
-</div>
+</motion.div>
 
-### 🧭 Main Navigation (`football_menu.cpp`)
+### 🧭 Presentation layer
 
-* Centered home menu with multiple screens
-* Keyboard and mouse navigation support
-* Shared top-bar chrome for subpages
+* `presentation.cpp` — main loop, League Standings UI, modals, search highlight
+* `football_menu.cpp` — main menu and sub-screens (live, schedule, stats, about)
 
----
+### 🧠 Logic layer (`logic.cpp`)
 
-### 🏆 League Table Management (`presentation.cpp`)
+* **Sort:** Quick Sort (points), `std::sort` (goals, name)
+* **Search:** linear, binary (name sort), partial name match
+* **Recursion:** total goals, total points, demo match goals series
+* **Persistence:** `load_teams_logic` / `persist_teams_logic` → `data` layer
 
-* Add new teams through modal input
-* Edit team name, goals, and points
-* Increment/decrement points directly from cards
-* Delete last team or clear all teams
-* Sort teams by points, goals, or name
+### 💾 Data layer (`data.cpp`)
 
----
-
-### 🔴 Live Scores View (`football_menu.cpp`)
-
-* Simulated match score cards
-* "Live" indicator styling
-* Auto-generated pairings based on current teams
-
----
-
-### 📅 Match Schedule (`football_menu.cpp`)
-
-* Fixture list with time slots
-* Dynamic team-vs-team generation
-* Matchday labeling
-
----
-
-### 📈 Season Statistics (`football_menu.cpp`)
-
-* Total clubs, goals, and points
-* Average goals per club
-* Leader detection and tier labeling
-
----
-
-### 💾 Data Layer (`data.cpp`)
-
-* Binary save/load system for `Team` records
-* Reads from and writes to `database.bin`
-* Restores previous league state on app start
-
----
-
-### 🧠 Logic Utilities (`logic.cpp`)
-
-* Team creation helpers
-* Team list quick sort implementation
-* Recursive total-goals calculator
+* Binary read/write of `Team` records to `database.bin`
 
 ---
 
 <div align="center">
-<h2 id="technologies">🛠️ Technologies</h2>
+<h2 id="technologies">🛠️ Used Technologies</h2>
 
 <br>
 
@@ -120,58 +162,71 @@ Team data is persisted in a local binary file (`database.bin`) between runs.
 <a href="https://www.nuget.org/"><img src="https://img.shields.io/badge/NuGet-004880?logo=nuget&logoColor=white&style=for-the-badge" /></a>
 <a href="https://github.com/"><img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white&style=for-the-badge" /></a>
 
-</div>
 
 ---
 
 <div align="center">
 <h2 id="system-overview">📊 System Overview</h2>
-</div>
+</motion.div>
 
-| Component | Responsibility |
-| --------- | -------------- |
-| `main.cpp` | App entry point |
-| `presentation.cpp` | Main app loop and league standings UI |
-| `football_menu.cpp` | Main menu and sub-screen rendering |
-| `logic.cpp` | Team operations and algorithm helpers |
-| `data.cpp` | Binary persistence (load/save) |
-| `team_ui.cpp` | Reusable team card drawing utilities |
+| Component | Layer | Responsibility |
+| --------- | ----- | -------------- |
+| `main.cpp` | — | Entry point, calls `run_app()` |
+| `presentation.cpp` | Presentation | GUI, League Standings, user input |
+| `football_menu.cpp` | Presentation | Main menu & sub-screens |
+| `team_ui.cpp` | Presentation | Reusable team card helpers |
+| `logic.cpp` | Logic | Sort, search, recursion, persist wrappers |
+| `data.cpp` | Data | `database.bin` load/save |
 
----
-
-<div align="center">
-<h2 id="project-structure">📁 Project Structure</h2>
-</div>
-
-```text
-BinaryBeasts/
-|- BinaryBeasts.sln
-|- README.md
-`- BinaryBeasts/
-   |- main.cpp
-   |- presentation.cpp / presentation.h
-   |- football_menu.cpp / football_menu.h
-   |- logic.cpp / logic.h
-   |- data.cpp / data.h
-   |- team_ui.cpp / team_ui.h
-   |- BinaryBeasts.vcxproj
-   |- packages.config
-   `- database.bin
+```
+Presentation  →  Logic  →  Data
+(presentation,     (logic.cpp)   (data.cpp,
+ football_menu)                  database.bin)
 ```
 
 ---
 
 <div align="center">
-<h2 id="installation">📥 Installation</h2>
-</div>
+<h2 id="contributors">👥 Contributors</h2>
+</motion.div>
+
+<table>
+  <tr>
+    <td align="center" width="250">
+      <img src="assets/Picture1.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 1"><br><br>
+      <b>Мирослав Илиев </b><br>
+      <sub>🎯 Scrum Trainer</sub>
+    </td>
+    <td align="center" width="250">
+      <img src="assets/Picture2.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 2"><br><br>
+      <b>Йордан Райнов </b><br>
+      <sub>⚙️ Front-End Developer</sub>
+    </td>
+  </tr>
+  <tr height="50"></tr>
+  <tr>
+    <td align="center" width="250">
+      <img src="assets/Picture3.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 3"><br><br>
+      <b>Димитър Нягалов </b><br>
+      <sub>⚙️ Back-End Developer</sub>
+    </td>
+    <td align="center" width="250">
+      <img src="assets/Picture4.jpg" width="120" height="120" style="border-radius: 50%; border: 3px solid #166534;" alt="Member 4"><br><br>
+      <b>Ивн Трифанов </b><br>
+      <sub>🎨 Back-End Developer</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 
 ### ⚙️ Requirements
 
 * Windows
 * Visual Studio 2022 (MSVC v143)
 * NuGet package restore enabled
-
----
+* Git
 
 ### 📦 Setup
 
@@ -181,16 +236,16 @@ cd BinaryBeasts
 ```
 
 1. Open `BinaryBeasts.sln` in Visual Studio.
-2. Restore NuGet packages when prompted (raylib is declared in `packages.config`).
-3. Select `Debug | x64` (or your preferred configuration).
+2. Restore NuGet packages (raylib in `packages.config`).
+3. Select `Debug | x64` (or your configuration).
 4. Build the solution.
 
 ---
 
 <div align="center">
 <h2 id="run-the-app">▶️ Run the App</h2>
-</div>
+</motion.div>
 
-* Start from Visual Studio (`F5` / `Ctrl + F5`).
-* The app opens in the main menu (`Pitch & Score`).
-* Team data is auto-saved on exit to `database.bin`.
+* Run with **F5** / **Ctrl+F5** from Visual Studio.
+* Home menu: **Pitch & Score** → open **League table & points**.
+* Changes are saved to `database.bin` on edit and on exit.
