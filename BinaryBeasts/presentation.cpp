@@ -1,10 +1,20 @@
-﻿#include "raylib.h"
+﻿#if __has_include("raylib.h")
+#if __has_include("raylib.h")
+#  include "raylib.h"
+#else
+#  include "raylib_stubs.h"
+#endif
+
 #include "football_menu.h"
 #include "logic.h"
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
 #include <cstring>
+
+#ifndef __RAYLIB_H__
+inline int GetFrameCount() { static int f = 0; return ++f; }
+#endif
 
 using namespace std;
 
@@ -143,7 +153,7 @@ void runApp() {
 
     vector<Team> teams = loadTeamsLogic();
 
-    // Начални данни, ако файлът е празен
+    
     if (teams.empty()) {
         addTeamLogic(teams, "Real Madrid");
         addTeamLogic(teams, "FC Barcelona");
@@ -154,7 +164,7 @@ void runApp() {
     int letterCount = 0;
     bool showAddModal = false;
     bool inputActive = false;
-    // Edit modal state
+    
     bool showEditModal = false;
     int editTeamIdx = -1;
     char editNameBuf[50] = "\0";
@@ -164,14 +174,13 @@ void runApp() {
     bool editGoalsActive = false;
     bool editPointsActive = false;
 
-    // Sort toggle state: 0 = by points, 1 = by goals, 2 = by name
+    
     int sortMode = 0;
     const char* sortLabels[3] = {"Sort: Points", "Sort: Goals", "Sort: Name"};
     char searchBuf[50] = "\0";
     bool searchInputActive = false;
     int foundTeamIndex = -1;
     while (!WindowShouldClose() && !shouldQuit) {
-        // Handle modal input (league table screen only)
         if (screen == AppScreen::LeagueStandings && showAddModal) {
             int key = GetCharPressed();
             while (key > 0) {
@@ -184,7 +193,6 @@ void runApp() {
             }
             if (inputActive && IsKeyPressed(KEY_BACKSPACE) && letterCount > 0) inputBuf[--letterCount] = '\0';
             if (inputActive && IsKeyPressed(KEY_ENTER) && letterCount > 0) {
-                // Validation: points and goals non-negative (default 0)
                 int valid = 1;
                 for (int i = 0; inputBuf[i]; ++i) {
                     if (inputBuf[i] < 32) valid = 0;
@@ -263,8 +271,6 @@ void runApp() {
         default:
             break;
         }
-
-        // Match the football main menu theme (pitch green + gold accent).
         Color pitch = GetColor(0x166534FF);
         Color pitchDark = GetColor(0x14532DFF);
         Color bg = pitch;
@@ -272,8 +278,8 @@ void runApp() {
         Color panel = GetColor(0xF0FDF4FF);
         Color cardTop = GetColor(0xFFFFFFFF);
         Color cardBottom = GetColor(0xECFDF5FF);
-        Color accent = GetColor(0xFACC15FF);      // gold
-        Color accentSoft = GetColor(0x22C55EFF);  // bright green
+        Color accent = GetColor(0xFACC15FF);
+        Color accentSoft = GetColor(0x22C55EFF);
         Color textMain = GetColor(0x052E16FF);
         Color textMuted = GetColor(0x365314FF);
         Color success = GetColor(0x16A34AFF);
@@ -296,17 +302,14 @@ void runApp() {
         const int FOOTER_W = MAIN_W;
         const int FOOTER_H = 110;
 
-        // Pitch stripes background (like main menu).
         ClearBackground(bg);
         for (int y = 0; y < 800; y += 80) {
             DrawRectangle(0, y, 1200, 40, (y / 80) % 2 == 0 ? Fade(pitch, 1.0f) : Fade(pitchDark, 0.35f));
         }
 
-        // Sidebar
         DrawRectangle(0, 0, SIDEBAR_W, 800, sidebar);
         DrawText("PITCH\n&SCORE", 58, 50, 30, accent);
 
-        // Sidebar buttons with icons and highlight
         int btnY = 228;
         int btnH = 64;
         int btnPad = 24;
@@ -330,11 +333,9 @@ void runApp() {
         for (int b = 0; b < 4; b++) {
             btnRects[b] = Rectangle{50, (float)btnY + b * (btnH + btnPad), 160, (float)btnH};
             btnHovers[b] = CheckCollisionPointRec(mouse, btnRects[b]);
-            // Highlight bar
             if (btnHovers[b]) DrawRectangle(36, (int)btnRects[b].y, 8, btnH, accent);
-            // Button background
             DrawRectangleRounded(btnRects[b], 0.22f, 8, btnHovers[b] ? btnHover : btnColor);
-            // Icon (simple shapes)
+
             int iconX = 64, iconY = (int)btnRects[b].y + 22;
             switch (b) {
                 case 0: // Add (plus)
@@ -406,7 +407,7 @@ void runApp() {
         DrawText("Goals", CARD_X + 644, MAIN_Y + 106, FONT_SECTION, accent);
         DrawText("Tier", CARD_X + 760, MAIN_Y + 106, FONT_SECTION, accent);
 
-        // Team list as cards or empty state
+        
         if (teams.empty()) {
             DrawText("No Teams Found", 600 - MeasureText("No Teams Found", 48)/2, 400, 48, textMuted);
         } else {
@@ -423,15 +424,15 @@ void runApp() {
             for (int i = listStart; i < listEnd; i++) {
                 int y = MAIN_Y + 156 + ((i - listStart) * 88);
                 bool isFound = (foundTeamIndex == i);
-                // Card shadow
+                
                 DrawRectangleRounded(Rectangle{(float)CARD_X + 3, (float)y + 7, (float)CARD_W - 6, 64}, 0.22f, 8, Fade(BLACK, 0.08f));
-                // Card gradient (simulate with two rectangles)
+                
                 DrawRectangleRounded(Rectangle{(float)CARD_X, (float)y, (float)CARD_W, 64}, 0.22f, 8, cardTop);
                 if (isFound) {
                     DrawRectangleRoundedLinesEx(Rectangle{(float)CARD_X, (float)y, (float)CARD_W, 64}, 0.22f, 8, 3.0f, accent);
                 }
                 DrawRectangleRounded(Rectangle{(float)CARD_X, (float)y + 32, (float)CARD_W, 32}, 0.22f, 8, cardBottom);
-                // Avatar (circle with initials)
+                
                 DrawCircle(CARD_X + 30, y + 32, 24, accentSoft);
                 char initials[3] = {0};
                 initials[0] = teams[i].name[0];
@@ -441,7 +442,7 @@ void runApp() {
                     }
                 }
                 DrawText(initials, CARD_X + 19, y + 19, 26, textMain);
-                // Team name (truncate if too long)
+                
                 int nameX = CARD_X + 76, nameY = y + 14;
                 DrawEllipsizedText(teams[i].name, Rectangle{(float)nameX, (float)nameY, 430, 32}, FONT_BODY, textMain, false);
                 float progress = (float)teams[i].points / (float)leaderPoints;
@@ -449,9 +450,9 @@ void runApp() {
                 if (progress > 1.0f) progress = 1.0f;
                 DrawRectangleRounded(Rectangle{(float)nameX, (float)y + 48, 430, 8}, 0.5f, 6, GetColor(0xE2E8F0FF));
                 DrawRectangleRounded(Rectangle{(float)nameX, (float)y + 48, 430.0f * progress, 8}, 0.5f, 6, accent);
-                // Points
+                
                 DrawEllipsizedText(TextFormat("%d", teams[i].points), Rectangle{(float)CARD_X + 524, (float)y + 14, 86, 36}, FONT_BODY, warning, true);
-                // Goals (fit in box)
+                
                 char goalsBuf[16];
                 snprintf(goalsBuf, 15, "%d", teams[i].goalsScored);
                 DrawEllipsizedText(goalsBuf, Rectangle{(float)CARD_X + 640, (float)y + 14, 86, 36}, FONT_BODY, success, true);
@@ -466,10 +467,10 @@ void runApp() {
                     if (CheckCollisionPointRec(mouse, minusPointBtn) && teams[i].points > 0) { teams[i].points--; persistTeamsLogic(teams); }
                     if (CheckCollisionPointRec(mouse, plusPointBtn)) { teams[i].points++; persistTeamsLogic(teams); }
                 }
-                // Edit button (pencil icon)
+                
                 Rectangle editBtn = Rectangle{(float)CARD_X + 852, (float)y + 14, 36, 36};
                 DrawRectangleRounded(editBtn, 0.4f, 8, GetColor(0xCBD5E1FF));
-                // Pencil icon
+                
                 DrawRectangle(editBtn.x+10, editBtn.y+20, 16, 4, textMain);
                 DrawRectangle(editBtn.x+18, editBtn.y+10, 4, 16, accent);
                 if (!showAddModal && !showEditModal && CheckCollisionPointRec(mouse, editBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -490,9 +491,9 @@ void runApp() {
             }
         }
 
-        // Footer
+        
         DrawRectangleRounded(Rectangle{(float)FOOTER_X, (float)FOOTER_Y, (float)FOOTER_W, (float)FOOTER_H}, 0.08f, 8, GetColor(0xE5E7EBFF));
-        // Dynamic total goals from teams
+        
         int totalGoals = calculateTotalGoalsFromTeamsRecursive(teams, (int)teams.size());
         DrawText(TextFormat("Total Goals: %d", totalGoals), FOOTER_X + 26, FOOTER_Y + 20, FONT_SECTION, textMain);
         DrawEllipsizedText(
@@ -508,7 +509,7 @@ void runApp() {
             Rectangle{(float)FOOTER_X + FOOTER_W - 168, (float)FOOTER_Y + 20, 156, 22},
             FONT_META, textMuted, false);
 
-        // Score insights panel (bounded text avoids overlap with copyright / window edge)
+        
         const float insightsBarY = (float)FOOTER_Y + 74;
         const float insightsBarH = 28.0f;
         DrawRectangleRounded(
@@ -534,14 +535,14 @@ void runApp() {
             DrawEllipsizedText("Add a team to unlock score insights.", insightsTextBox, FONT_META, insightsText, false);
         }
 
-        // Add Team Modal
+        
         if (showAddModal) {
             DrawRectangle(0, 0, 1200, 800, Fade(BLACK, 0.38f));
-            // Modal shadow
+            
             DrawRectangleRounded(Rectangle{384, 234, 512, 292}, 0.22f, 12, Fade(BLACK, 0.16f));
             DrawRectangleRounded(Rectangle{380, 230, 520, 300}, 0.22f, 12, panel);
             DrawText("Add New Team", 480, 265, FONT_TITLE, textMain);
-            // Input box
+            
             DrawRectangleRounded(Rectangle{440, 340, 400, 70}, 0.22f, 12, inputActive ? GetColor(0xE0F2FEFF) : GetColor(0xE5E7EBFF));
             DrawEllipsizedText(inputBuf[0] ? inputBuf : "Team name...", Rectangle{452, 344, 376, 62}, FONT_BODY, textMain, false);
             DrawText("Press ENTER to add, ESC to cancel", 440, 425, FONT_SMALL, textMuted);
@@ -550,7 +551,7 @@ void runApp() {
             }
         }
 
-        // Edit Team Modal
+        
         if (showEditModal && editTeamIdx >= 0 && editTeamIdx < (int)teams.size()) {
             const float modalX = 380.0f;
             const float modalY = 220.0f;
@@ -584,7 +585,7 @@ void runApp() {
             Rectangle saveBtn = Rectangle{modalX + modalW - 180, modalY + modalH - 68, 140, 48};
             DrawRectangleRounded(saveBtn, 0.22f, 12, accent);
             DrawText("Save", (int)saveBtn.x + 36, (int)saveBtn.y + 12, FONT_SECTION, WHITE);
-            // Input handling
+            
             if (CheckCollisionPointRec(mouse, Rectangle{520, (float)nameFieldY, 340, (float)fieldH}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 editNameActive = true; editGoalsActive = false;
             }
@@ -601,7 +602,7 @@ void runApp() {
                 persistTeamsLogic(teams);
                 showEditModal = false; editTeamIdx = -1;
             }
-            // Keyboard input
+            
             if (editNameActive) {
                 int key = GetCharPressed();
                 int len = (int)strlen(editNameBuf);
@@ -644,3 +645,5 @@ void runApp() {
     persistTeamsLogic(teams);
     CloseWindow();
 }
+
+#endif

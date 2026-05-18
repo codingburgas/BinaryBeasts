@@ -135,6 +135,7 @@
     <ClInclude Include="football_menu.h" />
     <ClInclude Include="logic.h" />
     <ClInclude Include="presentation.h" />
+    <ClInclude Include="raylib_stubs.h" />
     <ClInclude Include="team_ui.h" />
   </ItemGroup>
   <ItemGroup>
